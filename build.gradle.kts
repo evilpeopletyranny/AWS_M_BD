@@ -19,7 +19,9 @@ dependencies {
     implementation("org.jetbrains.exposed", "exposed-dao", exposedVersion)
     implementation("org.jetbrains.exposed", "exposed-jdbc", exposedVersion)
 
-    implementation("org.postgresql:postgresql:42.2.2")
+    implementation("org.postgresql:postgresql:42.5.4")
+    implementation("com.zaxxer:HikariCP:3.1.0")
+
 }
 
 tasks.test {

@@ -1,6 +1,6 @@
 package database.dao
 
-import org.jetbrains.exposed.sql.Database
+import database.DatabaseFactory
 import org.junit.jupiter.api.BeforeAll
 
 /**
@@ -24,11 +24,11 @@ sealed interface IDAOTest {
         @JvmStatic
         @BeforeAll
         fun connect() {
-            Database.connect(
-                url = "jdbc:postgresql://localhost:5432/cqc_test",
-                driver = "org.postgresql.Driver",
-                user = "postgres",
-                password = "postgre",
+            DatabaseFactory.init(
+                url = """jdbc:postgresql://localhost:5432/cqc_test?
+                        reWriteBatchedInserts=true& +
+                        rewriteBatchedStatements=true&
+                        shouldReturnGeneratedValues=false"""
             )
         }
     }

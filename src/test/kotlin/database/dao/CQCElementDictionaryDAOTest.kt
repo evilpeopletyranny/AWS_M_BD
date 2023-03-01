@@ -5,12 +5,14 @@ import org.jetbrains.exposed.sql.StdOutSqlLogger
 import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import java.sql.SQLException
 import java.util.*
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
-class CQCElementDictionaryTest : IDAOTest {
+class CQCElementDictionaryDAOTest : IDAOTest {
 
     private val defValues = setOf(
         CQCElementDictionaryEntity(UUID.randomUUID(), "Компетенция"),
@@ -135,6 +137,44 @@ class CQCElementDictionaryTest : IDAOTest {
             assertEquals(entity.id, id)
             assertEquals(deleted, 1)
             assertTrue { res == null }
+
+            rollback()
+        }
+    }
+
+    @Test
+    fun `element not created because such name exists`() {
+        transaction {
+            addLogger(StdOutSqlLogger)
+            val entity1 = defValues.first()
+            val entity2 = CQCElementDictionaryEntity(UUID.randomUUID(), entity1.name)
+
+            assertThrows<SQLException> {
+                CQCElementDictionaryDAO.multiInsert(listOf(entity1, entity2))
+            }
+
+            rollback()
+        }
+    }
+
+    @Test
+    fun `element not updated because such name exists`() {
+        transaction {
+            addLogger(StdOutSqlLogger)
+            val entity1 = defValues.first()
+            val entity2 = defValues.last()
+
+            CQCElementDictionaryDAO.multiInsert(listOf(entity1, entity2))
+
+            val fromBD = CQCElementDictionaryDAO.selectById(entity2.id)
+
+            fromBD?.let {
+                val forUpdate = CQCElementDictionaryEntity(it.id, entity1.name)
+
+                assertThrows<SQLException> {
+                    CQCElementDictionaryDAO.update(forUpdate)
+                }
+            }
 
             rollback()
         }
