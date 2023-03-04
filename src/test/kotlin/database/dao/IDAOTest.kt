@@ -3,6 +3,8 @@ package database.dao
 import database.DatabaseFactory
 import org.junit.jupiter.api.BeforeAll
 
+//TODO("SL4J)"
+
 /**
  * Общий интерфейс тестирования объекта доступа к таблице
  */

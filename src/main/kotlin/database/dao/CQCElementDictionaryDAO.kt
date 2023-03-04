@@ -2,17 +2,21 @@ package database.dao
 
 import database.entity.CQCElementDictionaryEntity
 import database.entity.CQCElementDictionaryTable
-import database.mapper.toCQCElementDictionaryEntity
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import java.lang.Exception
+import java.sql.SQLDataException
 import java.util.*
 
-fun CQCElementDictionaryTable.column(columName: String): Column<*> {
-    return columns.find { it.name == columName } ?: throw Exception("A")
-}
-
 object CQCElementDictionaryDAO : ICQCElementDictionaryDAO {
+    private fun CQCElementDictionaryTable.column(columnName: String): Column<*> {
+        return columns.find { it.name == columnName } ?: throw SQLDataException("Unknown column name: $columnName")
+    }
+
+    private fun ResultRow.toCQCElementDictionaryEntity(): CQCElementDictionaryEntity = CQCElementDictionaryEntity(
+        id = this[CQCElementDictionaryTable.id].value,
+        name = this[CQCElementDictionaryTable.name]
+    )
+
     override fun selectAll(
         limit: Int,
         offset: Long,
@@ -33,11 +37,13 @@ object CQCElementDictionaryDAO : ICQCElementDictionaryDAO {
         }.firstOrNull()?.toCQCElementDictionaryEntity()
     }
 
-    override fun insert(element: CQCElementDictionaryEntity): UUID {
-        return CQCElementDictionaryTable.insertAndGetId {
+    override fun insert(element: CQCElementDictionaryEntity): UUID? {
+        val insertedCount = CQCElementDictionaryTable.insert {
             it[id] = element.id
             it[name] = element.name
-        }.value
+        }.insertedCount
+
+        return if (insertedCount > 0) element.id else null
     }
 
     override fun multiInsert(elements: Collection<CQCElementDictionaryEntity>): List<ResultRow> {

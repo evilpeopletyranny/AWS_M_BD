@@ -1,6 +1,7 @@
 package database.dao
 
 import database.entity.CQCElementDictionaryEntity
+import database.entity.CQCElementHierarchyEntity
 import org.jetbrains.exposed.sql.ResultRow
 import java.util.*
 
@@ -20,7 +21,7 @@ sealed interface IDAO<EntityType> {
     fun selectAll(
         limit: Int = 100,
         offset: Long = 0,
-        orderBy: String = "id",
+        orderBy: String,
         order: String = "ASC"
     ): Set<EntityType>
 
@@ -40,9 +41,10 @@ sealed interface IDAO<EntityType> {
      */
     fun insert(
         element: EntityType,
-    ): UUID
+    ): UUID?
 
     //TODO("Посмотреть про batch insert")
+    //TODO("Результат?!")
     /**
      * Вставка нескольких записей
      *
@@ -72,3 +74,5 @@ sealed interface IDAO<EntityType> {
 }
 
 interface ICQCElementDictionaryDAO : IDAO<CQCElementDictionaryEntity>
+
+interface ICQCElementHierarchyDAO : IDAO<CQCElementHierarchyEntity>

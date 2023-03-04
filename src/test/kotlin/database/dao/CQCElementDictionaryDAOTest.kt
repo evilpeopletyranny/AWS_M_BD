@@ -22,15 +22,13 @@ class CQCElementDictionaryDAOTest : IDAOTest {
         CQCElementDictionaryEntity(UUID.randomUUID(), "Навык"),
     )
 
-    //TODO("SL4J)"
-
     @Test
     override fun `select all without parameters`() {
         transaction {
             addLogger(StdOutSqlLogger)
             CQCElementDictionaryDAO.multiInsert(defValues)
 
-            val res = CQCElementDictionaryDAO.selectAll()
+            val res = CQCElementDictionaryDAO.selectAll(orderBy = "id")
 
             assertTrue { res.isNotEmpty() }
             assertEquals(res.size, defValues.size)
@@ -48,7 +46,7 @@ class CQCElementDictionaryDAOTest : IDAOTest {
             addLogger(StdOutSqlLogger)
             CQCElementDictionaryDAO.multiInsert(defValues)
 
-            val res = CQCElementDictionaryDAO.selectAll(limit)
+            val res = CQCElementDictionaryDAO.selectAll(orderBy = "id", limit = limit)
 
             assertTrue { res.isNotEmpty() }
             assertEquals(res.size, limit)
@@ -104,7 +102,7 @@ class CQCElementDictionaryDAOTest : IDAOTest {
             addLogger(StdOutSqlLogger)
             val entity = defValues.first()
 
-            val id = CQCElementDictionaryDAO.insert(entity)
+            val id = CQCElementDictionaryDAO.insert(entity) ?: throw SQLException("Entity not created")
             val fromBD = CQCElementDictionaryDAO.selectById(entity.id)
 
             val forUpdate = CQCElementDictionaryEntity(
