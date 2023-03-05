@@ -73,6 +73,12 @@ sealed interface IDAO<EntityType> {
     ): Int
 }
 
+/**
+ * Интерфейс DAO для взаимодействия со словарём элементов ККХ: cqc_elem_dict
+ */
 interface ICQCElementDictionaryDAO : IDAO<CQCElementDictionaryEntity>
 
+/**
+ * Интерфейс DAO для взаимодействия с уровнями ККХ: cqc_elem_hierarchy
+ */
 interface ICQCElementHierarchyDAO : IDAO<CQCElementHierarchyEntity>

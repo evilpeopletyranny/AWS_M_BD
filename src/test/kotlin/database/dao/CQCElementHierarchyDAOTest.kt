@@ -13,6 +13,9 @@ import java.util.*
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
+/**
+ * Тест DAO для доступа к уровням иерархии ККХ
+ */
 class CQCElementHierarchyDAOTest : IDAOTest {
     private val orderBy = "child_type_id"
 
@@ -50,6 +53,10 @@ class CQCElementHierarchyDAOTest : IDAOTest {
             ),
         )
 
+        /**
+         * Заполнение словаря перед выполнением тестов.
+         * Иерархия содержит ссылку на типы элементов
+         */
         @JvmStatic
         @BeforeAll
         fun `fill dictionary`() {
@@ -59,6 +66,9 @@ class CQCElementHierarchyDAOTest : IDAOTest {
             }
         }
 
+        /**
+         * Удаление словаря после выполнения тестов.
+         */
         @JvmStatic
         @AfterAll
         fun `clear dictionary`() {
@@ -69,6 +79,9 @@ class CQCElementHierarchyDAOTest : IDAOTest {
         }
     }
 
+    /**
+     * Выборка всех записей без параметров поиска
+     */
     @Test
     override fun `select all without parameters`() {
         transaction {
@@ -85,6 +98,9 @@ class CQCElementHierarchyDAOTest : IDAOTest {
         }
     }
 
+    /**
+     * Выборка записей ограниченного размера
+     */
     @Test
     override fun `select all with limit`() {
         val limit = 3
@@ -104,6 +120,9 @@ class CQCElementHierarchyDAOTest : IDAOTest {
         }
     }
 
+    /**
+     * Выборка со всеми параметрами поиска
+     */
     @Test
     override fun `select all with all search options`() {
         val limit = 2
@@ -126,6 +145,9 @@ class CQCElementHierarchyDAOTest : IDAOTest {
         }
     }
 
+    /**
+     * Успешное создание записи в таблице
+     */
     @Test
     override fun `entity successfully created`() {
         transaction {
@@ -145,6 +167,9 @@ class CQCElementHierarchyDAOTest : IDAOTest {
         }
     }
 
+    /**
+     * Успешное обновление записи в таблице
+     */
     @Test
     override fun `entity updated successfully`() {
         transaction {
@@ -171,6 +196,9 @@ class CQCElementHierarchyDAOTest : IDAOTest {
         }
     }
 
+    /**
+     * Успешное удаление записи в таблице
+     */
     @Test
     override fun `entity deleted successfully`() {
         transaction {
@@ -189,6 +217,10 @@ class CQCElementHierarchyDAOTest : IDAOTest {
         }
     }
 
+    /**
+     * Удаление `верхнего` уровня иерархии
+     * Триггер hierarchy_delete_trigger()
+     */
     @Test
     fun `entity deletion at the top of hierarchy`() {
         val hierarchyTop = CQCElementHierarchyEntity(
@@ -210,6 +242,10 @@ class CQCElementHierarchyDAOTest : IDAOTest {
         }
     }
 
+    /**
+     * Удаление `нижнего` уровня иерархии
+     * Триггер hierarchy_delete_trigger()
+     */
     @Test
     fun `entity deletion at the bottom of hierarchy`() {
         val hierarchyBot = CQCElementHierarchyEntity(
@@ -231,6 +267,10 @@ class CQCElementHierarchyDAOTest : IDAOTest {
         }
     }
 
+    /**
+     * Удаление `среднего` (имеется уровни и выше и ниже этого) уровня иерархии
+     * Триггер hierarchy_delete_trigger()
+     */
     @Test
     fun `entity deletion at the middle of hierarchy`() {
         val newId = UUID.randomUUID()
@@ -273,6 +313,10 @@ class CQCElementHierarchyDAOTest : IDAOTest {
         }
     }
 
+    /**
+     * Добавление нового `верхнего` уровня иерархии
+     * Триггер hierarchy_insert_trigger()
+     */
     @Test
     fun `entity creating at the top of hierarchy`() {
         val newId = UUID.randomUUID()
@@ -303,6 +347,10 @@ class CQCElementHierarchyDAOTest : IDAOTest {
         }
     }
 
+    /**
+     * Добавление нового `нижнего` уровня иерархии
+     * Триггер hierarchy_insert_trigger()
+     */
     @Test
     fun `entity creating at the bot of hierarchy`() {
         val newId = UUID.randomUUID()
@@ -334,6 +382,10 @@ class CQCElementHierarchyDAOTest : IDAOTest {
         }
     }
 
+    /**
+     * Добавление нового `среднего` уровня иерархии
+     * Триггер hierarchy_insert_trigger()
+     */
     @Test
     fun `entity creating at the middle of hierarchy`() {
         val newId = UUID.randomUUID()

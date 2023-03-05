@@ -10,19 +10,40 @@ import org.junit.jupiter.api.BeforeAll
  */
 sealed interface IDAOTest {
 
+    /**
+     * Выборка всех элементов без параметров поиска
+     */
     fun `select all without parameters`()
 
+    /**
+     * Выборка элементов ограниченного размера
+     */
     fun `select all with limit`()
 
+    /**
+     * Выборка элементов со всеми параметрами поиска
+     */
     fun `select all with all search options`()
 
+    /**
+     * Успешное добавление записи
+     */
     fun `entity successfully created`()
 
+    /**
+     * Успешное обновление записи
+     */
     fun `entity updated successfully`()
 
+    /**
+     * Успешное удаление записи
+     */
     fun `entity deleted successfully`()
 
     companion object {
+        /**
+         * Инициализация подключения к БД перед тестами
+         */
         @JvmStatic
         @BeforeAll
         fun connect() {

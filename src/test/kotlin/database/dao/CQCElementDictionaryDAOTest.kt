@@ -12,6 +12,9 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
+/**
+ * Тест DAO для доступа к словарю элементов ККХ
+ */
 class CQCElementDictionaryDAOTest : IDAOTest {
 
     private val defValues = setOf(
@@ -22,6 +25,9 @@ class CQCElementDictionaryDAOTest : IDAOTest {
         CQCElementDictionaryEntity(UUID.randomUUID(), "Навык"),
     )
 
+    /**
+     * Выборка всех записей без параметров поиска
+     */
     @Test
     override fun `select all without parameters`() {
         transaction {
@@ -38,6 +44,9 @@ class CQCElementDictionaryDAOTest : IDAOTest {
         }
     }
 
+    /**
+     * Выборка записей ограниченного размера
+     */
     @Test
     override fun `select all with limit`() {
         val limit = 3
@@ -56,6 +65,9 @@ class CQCElementDictionaryDAOTest : IDAOTest {
         }
     }
 
+    /**
+     * Выборка со всеми параметрами поиска
+     */
     @Test
     override fun `select all with all search options`() {
         val limit = 3
@@ -72,14 +84,16 @@ class CQCElementDictionaryDAOTest : IDAOTest {
             assertTrue { res.isNotEmpty() }
             assertEquals(res.size, limit)
             assertEquals(
-                defValues.sortedBy { it.name }.reversed().subList(offset, limit + offset).toSet(),
-                res
+                defValues.sortedBy { it.name }.reversed().subList(offset, limit + offset).toSet(), res
             )
 
             rollback()
         }
     }
 
+    /**
+     * Успешное создание записи в таблице
+     */
     @Test
     override fun `entity successfully created`() {
         transaction {
@@ -97,6 +111,9 @@ class CQCElementDictionaryDAOTest : IDAOTest {
         }
     }
 
+    /**
+     * Успешное обновление записи в таблице
+     */
     override fun `entity updated successfully`() {
         transaction {
             addLogger(StdOutSqlLogger)
@@ -121,6 +138,9 @@ class CQCElementDictionaryDAOTest : IDAOTest {
         }
     }
 
+    /**
+     * Успешное удаление записи в таблице
+     */
     @Test
     override fun `entity deleted successfully`() {
         transaction {
@@ -140,6 +160,9 @@ class CQCElementDictionaryDAOTest : IDAOTest {
         }
     }
 
+    /**
+     * Неудачное создание записи, поскольку данное имя уже занято
+     */
     @Test
     fun `element not created because such name exists`() {
         transaction {
@@ -155,6 +178,9 @@ class CQCElementDictionaryDAOTest : IDAOTest {
         }
     }
 
+    /**
+     * Неудачное обновление записи, поскольку данное имя уже занято
+     */
     @Test
     fun `element not updated because such name exists`() {
         transaction {
