@@ -33,6 +33,7 @@ as
 $$
 BEGIN
     if (new.child_type_id in (select child_type_id from cqc_elem_hierarchy)) then
+        raise notice 'TUT!';
         update cqc_elem_hierarchy
         set child_type_id = new.parent_type_id
         where new.child_type_id = child_type_id;
@@ -46,6 +47,8 @@ create trigger hierarchy_insert_trigger
     on cqc_elem_hierarchy
     for each row
 execute procedure hierarchy_insert_trigger();
+
+drop trigger hierarchy_insert_trigger on cqc_elem_hierarchy;
 
 create or replace function hierarchy_delete_trigger() returns trigger
     language plpgsql
@@ -76,8 +79,7 @@ create trigger hierarchy_delete_trigger
     for each row
 execute procedure hierarchy_delete_trigger();
 
--- drop trigger hierarchy_insert_trigger on cqc_elem_hierarchy;
-drop trigger hierarchy_delete_trigger on cqc_elem_hierarchy;
+-- drop trigger hierarchy_delete_trigger on cqc_elem_hierarchy;
 
 create or replace function hierarchy_delete(pID uuid, cID uuid) returns void
     language plpgsql as

@@ -18,25 +18,18 @@ class CQCElementHierarchyDAOTest : IDAOTest {
 
     companion object {
         enum class HierarchyElements {
-            Competence,
-            Indicator,
-            Knowledge,
-            Ability,
-            Skill
+            Competence, Indicator, Knowledge, Ability, Skill
         }
 
         private val dictionary = mapOf(
             HierarchyElements.Competence to CQCElementDictionaryEntity(
-                UUID.randomUUID(),
-                HierarchyElements.Competence.name
+                UUID.randomUUID(), HierarchyElements.Competence.name
             ),
             HierarchyElements.Indicator to CQCElementDictionaryEntity(
-                UUID.randomUUID(),
-                HierarchyElements.Indicator.name
+                UUID.randomUUID(), HierarchyElements.Indicator.name
             ),
             HierarchyElements.Knowledge to CQCElementDictionaryEntity(
-                UUID.randomUUID(),
-                HierarchyElements.Knowledge.name
+                UUID.randomUUID(), HierarchyElements.Knowledge.name
             ),
             HierarchyElements.Ability to CQCElementDictionaryEntity(UUID.randomUUID(), HierarchyElements.Ability.name),
             HierarchyElements.Skill to CQCElementDictionaryEntity(UUID.randomUUID(), HierarchyElements.Skill.name),
@@ -44,20 +37,16 @@ class CQCElementHierarchyDAOTest : IDAOTest {
 
         val hierarchy = setOf(
             CQCElementHierarchyEntity(
-                dictionary[HierarchyElements.Competence]!!.id,
-                dictionary[HierarchyElements.Indicator]!!.id
+                dictionary[HierarchyElements.Competence]!!.id, dictionary[HierarchyElements.Indicator]!!.id
             ),
             CQCElementHierarchyEntity(
-                dictionary[HierarchyElements.Indicator]!!.id,
-                dictionary[HierarchyElements.Knowledge]!!.id
+                dictionary[HierarchyElements.Indicator]!!.id, dictionary[HierarchyElements.Knowledge]!!.id
             ),
             CQCElementHierarchyEntity(
-                dictionary[HierarchyElements.Indicator]!!.id,
-                dictionary[HierarchyElements.Ability]!!.id
+                dictionary[HierarchyElements.Indicator]!!.id, dictionary[HierarchyElements.Ability]!!.id
             ),
             CQCElementHierarchyEntity(
-                dictionary[HierarchyElements.Indicator]!!.id,
-                dictionary[HierarchyElements.Skill]!!.id
+                dictionary[HierarchyElements.Indicator]!!.id, dictionary[HierarchyElements.Skill]!!.id
             ),
         )
 
@@ -108,8 +97,7 @@ class CQCElementHierarchyDAOTest : IDAOTest {
 
             assertTrue { res.isNotEmpty() }
             assertEquals(res.size, limit)
-            assertEquals(
-                hierarchy.sortedBy { it.childId.toString() }.take(limit),
+            assertEquals(hierarchy.sortedBy { it.childId.toString() }.take(limit),
                 res.sortedBy { it.childId.toString() })
 
             rollback()
@@ -131,8 +119,7 @@ class CQCElementHierarchyDAOTest : IDAOTest {
             assertTrue { res.isNotEmpty() }
             assertEquals(res.size, limit)
             assertEquals(
-                hierarchy.sortedBy { it.childId.toString() }.reversed().subList(offset, limit + offset).toSet(),
-                res
+                hierarchy.sortedBy { it.childId.toString() }.reversed().subList(offset, limit + offset).toSet(), res
             )
 
             rollback()
@@ -205,8 +192,7 @@ class CQCElementHierarchyDAOTest : IDAOTest {
     @Test
     fun `entity deletion at the top of hierarchy`() {
         val hierarchyTop = CQCElementHierarchyEntity(
-            dictionary[HierarchyElements.Competence]!!.id,
-            dictionary[HierarchyElements.Indicator]!!.id
+            dictionary[HierarchyElements.Competence]!!.id, dictionary[HierarchyElements.Indicator]!!.id
         )
         val expectedRes = hierarchy.filterNot { it == hierarchyTop }.toSet()
 
@@ -227,8 +213,7 @@ class CQCElementHierarchyDAOTest : IDAOTest {
     @Test
     fun `entity deletion at the bottom of hierarchy`() {
         val hierarchyBot = CQCElementHierarchyEntity(
-            dictionary[HierarchyElements.Indicator]!!.id,
-            dictionary[HierarchyElements.Skill]!!.id
+            dictionary[HierarchyElements.Indicator]!!.id, dictionary[HierarchyElements.Skill]!!.id
         )
         val expectedRes = hierarchy.filterNot { it == hierarchyBot }.toSet()
 
@@ -238,10 +223,6 @@ class CQCElementHierarchyDAOTest : IDAOTest {
             val deleted = CQCElementHierarchyDAO.deleteHierarchyLevel(hierarchyBot)
 
             val res = CQCElementHierarchyDAO.selectAll(orderBy = orderBy)
-
-            res.map { Pair(CQCElementDictionaryDAO.selectById(it.parentId), CQCElementDictionaryDAO.selectById(it.childId)) }.forEach {
-                println(it)
-            }
 
             assertEquals(deleted, 1)
             assertEquals(res, expectedRes)
@@ -258,27 +239,22 @@ class CQCElementHierarchyDAOTest : IDAOTest {
         )
 
         val hierarchyMiddle = CQCElementHierarchyEntity(
-            parentId = newId,
-            childId = dictionary[HierarchyElements.Indicator]!!.id
+            parentId = newId, childId = dictionary[HierarchyElements.Indicator]!!.id
         )
 
         val localHierarchy = setOf(
             CQCElementHierarchyEntity(
-                dictionary[HierarchyElements.Competence]!!.id,
-                hierarchyMiddle.parentId
+                dictionary[HierarchyElements.Competence]!!.id, hierarchyMiddle.parentId
             ),
             hierarchyMiddle,
             CQCElementHierarchyEntity(
-                dictionary[HierarchyElements.Indicator]!!.id,
-                dictionary[HierarchyElements.Knowledge]!!.id
+                dictionary[HierarchyElements.Indicator]!!.id, dictionary[HierarchyElements.Knowledge]!!.id
             ),
             CQCElementHierarchyEntity(
-                dictionary[HierarchyElements.Indicator]!!.id,
-                dictionary[HierarchyElements.Ability]!!.id
+                dictionary[HierarchyElements.Indicator]!!.id, dictionary[HierarchyElements.Ability]!!.id
             ),
             CQCElementHierarchyEntity(
-                dictionary[HierarchyElements.Indicator]!!.id,
-                dictionary[HierarchyElements.Skill]!!.id
+                dictionary[HierarchyElements.Indicator]!!.id, dictionary[HierarchyElements.Skill]!!.id
             ),
         )
 
@@ -290,36 +266,114 @@ class CQCElementHierarchyDAOTest : IDAOTest {
 
             val res = CQCElementHierarchyDAO.selectAll(orderBy = orderBy)
 
-            println()
-            println()
-            print("middle: ")
-            println(hierarchyMiddle)
-            print("localH: ")
-            println(localHierarchy)
-            println()
-            println()
-            print("hierarchy: ")
-            println(hierarchy.sortedBy { it.childId })
-            print("res:       ")
-            println(res.sortedBy { it.childId })
-            println()
-            println()
-            res.forEach{
-                println(CQCElementDictionaryDAO.selectById(it.childId))
-            }
-            localHierarchy.map { Pair(CQCElementDictionaryDAO.selectById(it.parentId), CQCElementDictionaryDAO.selectById(it.childId)) }.forEach {
-                println(it)
-            }
-            println()
-            res.map { Pair(CQCElementDictionaryDAO.selectById(it.parentId), CQCElementDictionaryDAO.selectById(it.childId)) }.forEach {
-                println(it)
-            }
-
-            println()
-            println()
-
             assertEquals(deleted, 1)
             assertEquals(res, hierarchy)
+
+            rollback()
+        }
+    }
+
+    @Test
+    fun `entity creating at the top of hierarchy`() {
+        val newId = UUID.randomUUID()
+        val newDictionaryElem = CQCElementDictionaryEntity(
+            newId, "New element"
+        )
+
+        val hierarchyTop = CQCElementHierarchyEntity(
+            parentId = newId, childId = dictionary[HierarchyElements.Competence]!!.id
+        )
+
+        val expectedHierarchy = hierarchy + hierarchyTop
+
+        transaction {
+            addLogger(StdOutSqlLogger)
+            CQCElementDictionaryDAO.insert(newDictionaryElem)
+            CQCElementHierarchyDAO.multiInsert(hierarchy)
+
+            val newElemId = CQCElementHierarchyDAO.insert(hierarchyTop) ?: throw SQLException("Entity not created")
+            val newElem = CQCElementDictionaryDAO.selectById(newElemId)
+
+            val res = CQCElementHierarchyDAO.selectAll(orderBy = orderBy)
+
+            assertTrue { newElem != null }
+            assertEquals(res, expectedHierarchy)
+
+            rollback()
+        }
+    }
+
+    @Test
+    fun `entity creating at the bot of hierarchy`() {
+        val newId = UUID.randomUUID()
+        val newDictionaryElem = CQCElementDictionaryEntity(
+            newId, "New element"
+        )
+
+        val hierarchyBot = CQCElementHierarchyEntity(
+            parentId = dictionary[HierarchyElements.Knowledge]!!.id,
+            childId = newId
+        )
+
+        val expectedHierarchy = hierarchy + hierarchyBot
+
+        transaction {
+            addLogger(StdOutSqlLogger)
+            CQCElementDictionaryDAO.insert(newDictionaryElem)
+            CQCElementHierarchyDAO.multiInsert(hierarchy)
+
+            val newElemId = CQCElementHierarchyDAO.insert(hierarchyBot) ?: throw SQLException("Entity not created")
+            val newElem = CQCElementDictionaryDAO.selectById(newElemId)
+
+            val res = CQCElementHierarchyDAO.selectAll(orderBy = orderBy)
+
+            assertTrue { newElem != null }
+            assertEquals(res, expectedHierarchy)
+
+            rollback()
+        }
+    }
+
+    @Test
+    fun `entity creating at the middle of hierarchy`() {
+        val newId = UUID.randomUUID()
+        val newDictionaryElem = CQCElementDictionaryEntity(
+            newId, "New element"
+        )
+
+        val hierarchyMiddle = CQCElementHierarchyEntity(
+            parentId = newId,
+            childId = dictionary[HierarchyElements.Indicator]!!.id
+        )
+
+        val expectedHierarchy = setOf(
+            CQCElementHierarchyEntity(
+                dictionary[HierarchyElements.Competence]!!.id, newId
+            ),
+            hierarchyMiddle,
+            CQCElementHierarchyEntity(
+                dictionary[HierarchyElements.Indicator]!!.id, dictionary[HierarchyElements.Knowledge]!!.id
+            ),
+            CQCElementHierarchyEntity(
+                dictionary[HierarchyElements.Indicator]!!.id, dictionary[HierarchyElements.Ability]!!.id
+            ),
+            CQCElementHierarchyEntity(
+                dictionary[HierarchyElements.Indicator]!!.id, dictionary[HierarchyElements.Skill]!!.id
+            ),
+        )
+
+        transaction {
+            addLogger(StdOutSqlLogger)
+            CQCElementDictionaryDAO.insert(newDictionaryElem)
+            CQCElementHierarchyDAO.multiInsert(hierarchy)
+
+            val newElemId = CQCElementHierarchyDAO.insert(hierarchyMiddle) ?: throw SQLException("Entity not created")
+            val newElem = CQCElementDictionaryDAO.selectById(newElemId)
+
+            val res = CQCElementHierarchyDAO.selectAll(orderBy = orderBy)
+
+            assertTrue { newElem != null }
+            assertEquals(res, expectedHierarchy)
 
             rollback()
         }
