@@ -26,6 +26,25 @@ class CQCElementDictionaryDAOTest : IDAOTest {
     )
 
     /**
+     * Выборка записи по id
+     */
+    @Test
+    override fun `select by id`() {
+        transaction {
+            addLogger(StdOutSqlLogger)
+            val entity = defValues.first()
+            val resId = CQCElementDictionaryDAO.insert(entity)
+            val res = resId?.let { CQCElementDictionaryDAO.selectById(it) }
+
+            assertEquals(entity.id, resId)
+            assertTrue { res != null }
+            assertEquals(res, entity)
+
+            rollback()
+        }
+    }
+
+    /**
      * Выборка всех записей без параметров поиска
      */
     @Test
@@ -114,6 +133,7 @@ class CQCElementDictionaryDAOTest : IDAOTest {
     /**
      * Успешное обновление записи в таблице
      */
+    @Test
     override fun `entity updated successfully`() {
         transaction {
             addLogger(StdOutSqlLogger)

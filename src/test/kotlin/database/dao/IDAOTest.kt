@@ -9,6 +9,10 @@ import org.junit.jupiter.api.BeforeAll
  * Общий интерфейс тестирования объекта доступа к таблице
  */
 sealed interface IDAOTest {
+    /**
+     * Выборка элемента по id
+     */
+    fun `select by id`()
 
     /**
      * Выборка всех элементов без параметров поиска

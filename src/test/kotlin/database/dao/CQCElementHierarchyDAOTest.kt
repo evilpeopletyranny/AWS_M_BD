@@ -34,8 +34,12 @@ class CQCElementHierarchyDAOTest : IDAOTest {
             HierarchyElements.Knowledge to CQCElementDictionaryEntity(
                 UUID.randomUUID(), HierarchyElements.Knowledge.name
             ),
-            HierarchyElements.Ability to CQCElementDictionaryEntity(UUID.randomUUID(), HierarchyElements.Ability.name),
-            HierarchyElements.Skill to CQCElementDictionaryEntity(UUID.randomUUID(), HierarchyElements.Skill.name),
+            HierarchyElements.Ability to CQCElementDictionaryEntity(
+                UUID.randomUUID(), HierarchyElements.Ability.name
+            ),
+            HierarchyElements.Skill to CQCElementDictionaryEntity(
+                UUID.randomUUID(), HierarchyElements.Skill.name
+            ),
         )
 
         val hierarchy = setOf(
@@ -76,6 +80,25 @@ class CQCElementHierarchyDAOTest : IDAOTest {
                 addLogger(StdOutSqlLogger)
                 dictionary.values.forEach { CQCElementDictionaryDAO.deleteById(it.id) }
             }
+        }
+    }
+
+    /**
+     * Выборка записи по id
+     */
+    @Test
+    override fun `select by id`() {
+        transaction {
+            addLogger(StdOutSqlLogger)
+            val entity = hierarchy.first()
+            val resId = CQCElementHierarchyDAO.insert(entity)
+            val res = resId?.let { CQCElementHierarchyDAO.selectById(it) }
+
+            assertEquals(entity.childId, resId)
+            assertTrue { res != null }
+            assertEquals(res, entity)
+
+            rollback()
         }
     }
 

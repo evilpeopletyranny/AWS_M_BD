@@ -1,6 +1,7 @@
 package database.dao
 
 import database.entity.CQCElementDictionaryEntity
+import database.entity.CQCElementEntity
 import database.entity.CQCElementHierarchyEntity
 import org.jetbrains.exposed.sql.ResultRow
 import java.util.*
@@ -82,3 +83,8 @@ interface ICQCElementDictionaryDAO : IDAO<CQCElementDictionaryEntity>
  * Интерфейс DAO для взаимодействия с уровнями ККХ: cqc_elem_hierarchy
  */
 interface ICQCElementHierarchyDAO : IDAO<CQCElementHierarchyEntity>
+
+/**
+ * Интерфейс DAO для взаимодействия ККХ: cqc_elem
+ */
+interface ICQCElementDAO : IDAO<CQCElementEntity>
