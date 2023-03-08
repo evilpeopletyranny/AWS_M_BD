@@ -1,4 +1,4 @@
-package database.entity
+package database.entity.cqc
 
 import org.jetbrains.exposed.dao.id.UUIDTable
 import java.util.*

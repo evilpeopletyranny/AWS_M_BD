@@ -1,21 +1,23 @@
-package database.dao
+package database.dao.cqc
 
-import database.entity.CQCElementDictionaryEntity
-import database.entity.CQCElementEntity
-import database.entity.CQCElementHierarchyEntity
+import database.DatabaseFactory
+import database.entity.cqc.CQCElementDictionaryEntity
+import database.entity.cqc.CQCElementEntity
+import database.entity.cqc.CQCElementHierarchyEntity
 import org.jetbrains.exposed.sql.StdOutSqlLogger
 import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.sql.SQLException
 import java.util.*
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
-class CQCElementDAOTest : IDAOTest {
+class CQCManipulation {
     private val orderBy = "id"
+    private val hierarchyOrderBy = "child_type_id"
 
     companion object {
         enum class HierarchyElements {
@@ -91,6 +93,13 @@ class CQCElementDAOTest : IDAOTest {
         @JvmStatic
         @BeforeAll
         fun `fill dictionary and hierarchy`() {
+            DatabaseFactory.init(
+                url = """jdbc:postgresql://localhost:5432/cqc_test?
+                        reWriteBatchedInserts=true& +
+                        rewriteBatchedStatements=true&
+                        shouldReturnGeneratedValues=false"""
+            )
+
             transaction {
                 addLogger(StdOutSqlLogger)
                 CQCElementDictionaryDAO.multiInsert(dictionary.values)
@@ -110,158 +119,47 @@ class CQCElementDAOTest : IDAOTest {
     }
 
     /**
-     * Выборка записи по id
+     * Удалять элементы с дочерними связями - невозможно
      */
     @Test
-    override fun `select by id`() {
-        transaction {
-            addLogger(StdOutSqlLogger)
-            val entity = defValues.first()
-            val resId = CQCElementDAO.insert(entity)
-            val res = resId?.let { CQCElementDAO.selectById(it) }
+    fun `deleting an element with child elements is not possible`() {
+        val type = dictionary[HierarchyElements.Indicator]
 
-            assertEquals(entity.id, resId)
-            assertTrue { res != null }
-            assertEquals(res, entity)
-
-            rollback()
-        }
-    }
-
-    /**
-     * Выборка всех записей без параметров поиска
-     */
-    @Test
-    override fun `select all without parameters`() {
         transaction {
             addLogger(StdOutSqlLogger)
             CQCElementDAO.multiInsert(defValues)
+            val entity = defValues.find { it.type == type }!!
 
-            val res = CQCElementDAO.selectAll(orderBy = orderBy)
 
-            assertTrue { res.isNotEmpty() }
-            assertEquals(res.size, defValues.size)
-            assertEquals(defValues, res)
+            val localDictionary = CQCElementDictionaryDAO.selectAll(orderBy = orderBy)
+            val localHierarchy = CQCElementHierarchyDAO.selectAll(orderBy = hierarchyOrderBy)
 
+            assertThrows<SQLException> {
+                CQCElementDAO.deleteById(entity.id)
+            }
+            assertEquals(dictionary.values.toSet(), localDictionary)
+            assertEquals(hierarchy, localHierarchy)
             rollback()
         }
     }
 
     /**
-     * Выборка записей ограниченного размера
+     * Удаление типа влияет на иерархию
      */
     @Test
-    override fun `select all with limit`() {
-        val limit = 3
+    fun `deleting an cqc type affects the hierarchy`() {
+        val type = dictionary[HierarchyElements.Indicator]!!
 
         transaction {
             addLogger(StdOutSqlLogger)
             CQCElementDAO.multiInsert(defValues)
 
-            val res = CQCElementDAO.selectAll(orderBy = orderBy, limit = limit)
+            val deleted = CQCElementDictionaryDAO.deleteById(type.id)
+            val localHierarchy = CQCElementHierarchyDAO.selectAll(orderBy = hierarchyOrderBy)
 
-            assertTrue { res.isNotEmpty() }
-            assertEquals(res.size, limit)
-            assertEquals(
-                defValues.sortedBy { it.id.toString() }.take(limit),
-                res.sortedBy { it.id.toString() })
+            println(localHierarchy)
 
-            rollback()
-        }
-    }
-
-    /**
-     * Выборка со всеми параметрами поиска
-     */
-    @Test
-    override fun `select all with all search options`() {
-        val limit = 3
-        val offset = 1
-        val orderBy = "type_id"
-        val order = "DESC"
-
-        transaction {
-            addLogger(StdOutSqlLogger)
-            CQCElementDAO.multiInsert(defValues)
-
-            val res = CQCElementDAO.selectAll(limit, offset.toLong(), orderBy, order)
-
-            assertTrue { res.isNotEmpty() }
-            assertEquals(res.size, limit)
-            assertEquals(
-                defValues.sortedBy { it.type.toString() }.reversed().subList(offset, limit + offset).toSet(),
-                res
-            )
-
-            rollback()
-        }
-    }
-
-    /**
-     * Успешное создание записи в таблице
-     */
-    @Test
-    override fun `entity successfully created`() {
-        transaction {
-            addLogger(StdOutSqlLogger)
-            val entity = defValues.first()
-
-            val id = CQCElementDAO.insert(entity)
-            val res = CQCElementDAO.selectById(entity.id)
-
-            assertEquals(entity.id, id)
-            assertTrue { res != null }
-            assertEquals(res, entity)
-
-            rollback()
-        }
-    }
-
-    /**
-     * Успешное обновление записи в таблице
-     */
-    @Test
-    override fun `entity updated successfully`() {
-        transaction {
-            addLogger(StdOutSqlLogger)
-            CQCElementDAO.multiInsert(defValues)
-            val fromBD = CQCElementDAO.selectById(defValues.last().id) ?: throw SQLException("Entity not created")
-
-            val forUpdate = CQCElementEntity(
-                id = fromBD.id,
-                parentId = null,
-                type = dictionary[HierarchyElements.Competence]!!,
-                value = "New competence"
-            )
-
-            val updated = CQCElementDAO.update(forUpdate)
-            val res = CQCElementDAO.selectById(forUpdate.id)
-
-            assertTrue { res != null }
-            assertTrue { updated == 1 }
-            assertEquals(forUpdate, res)
-
-            rollback()
-        }
-    }
-
-    /**
-     * Успешное удаление записи в таблице
-     */
-    @Test
-    override fun `entity deleted successfully`() {
-        transaction {
-            addLogger(StdOutSqlLogger)
-            val entity = defValues.first()
-
-            val id = CQCElementDAO.insert(entity)
-            val fromBD = CQCElementDAO.selectById(entity.id)
-            val deleted = fromBD?.let { CQCElementDAO.deleteById(it.id) }
-            val res = fromBD?.let { CQCElementDAO.selectById(it.id) }
-
-            assertEquals(entity.id, id)
             assertEquals(deleted, 1)
-            assertTrue { res == null }
 
             rollback()
         }

@@ -1,8 +1,8 @@
 package database.dao
 
-import database.entity.CQCElementDictionaryEntity
-import database.entity.CQCElementEntity
-import database.entity.CQCElementHierarchyEntity
+import database.entity.cqc.CQCElementDictionaryEntity
+import database.entity.cqc.CQCElementEntity
+import database.entity.cqc.CQCElementHierarchyEntity
 import org.jetbrains.exposed.sql.ResultRow
 import java.util.*
 

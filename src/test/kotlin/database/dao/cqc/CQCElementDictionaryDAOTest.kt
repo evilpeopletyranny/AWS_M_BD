@@ -1,6 +1,7 @@
-package database.dao
+package database.dao.cqc
 
-import database.entity.CQCElementDictionaryEntity
+import database.dao.IDAOTest
+import database.entity.cqc.CQCElementDictionaryEntity
 import org.jetbrains.exposed.sql.StdOutSqlLogger
 import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.transactions.transaction

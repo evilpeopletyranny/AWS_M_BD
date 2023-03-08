@@ -76,18 +76,16 @@ execute procedure hierarchy_delete_trigger();
 -- Таблица самих ККХ
 create table cqc_elem
 (
-    id        uuid         not null
+    id        uuid not null
         constraint cqc_element_pk
             primary key,
     parent_id uuid
         constraint parent_id_fk
-            references cqc_elem
-            on delete cascade,
-    type_id   uuid         not null
+            references cqc_elem,
+    type_id   uuid
         constraint type_id_fk
-            references cqc_elem_dict
-            on delete cascade,
-    value     varchar(250) not null unique
+            references cqc_elem_dict,
+    value     varchar(250) unique
 );
 
 -- Проверка соответсвия иерархии
@@ -99,12 +97,15 @@ declare
     parentType uuid;
 
 begin
-    parentType = (select parentType from cqc_elem where id = new.parent_id);
-    if (new.type_id in (select child_type_id from cqc_elem_hierarchy) and
-        parentType not in (select parent_type_id from cqc_elem_hierarchy)) then
+    parentType = (select type_id from cqc_elem where id = new.parent_id);
+    if (new.type_id in (select child_type_id from cqc_elem_hierarchy)
+        and (
+                (parentType is null) or
+                (parentType != (select parent_type_id from cqc_elem_hierarchy where child_type_id = new.type_id))
+            )) then
         raise exception 'Hierarchy violation. Parent: % - Child:%',
-            (select name from cqc_elem_dict where id = parentType),
-            (select name from cqc_elem_dict where id = new.type_id);
+                (select name from cqc_elem_dict where id = parentType),
+                (select name from cqc_elem_dict where id = new.type_id);
     end if;
     return new;
 end;
@@ -126,9 +127,6 @@ create table course
             primary key,
     name varchar(250) not null
 );
-
-alter table course
-    owner to postgres;
 
 create table course_input_leaf_link
 (

@@ -8,7 +8,7 @@ import org.junit.jupiter.api.BeforeAll
 /**
  * Общий интерфейс тестирования объекта доступа к таблице
  */
-sealed interface IDAOTest {
+interface IDAOTest {
     /**
      * Выборка элемента по id
      */

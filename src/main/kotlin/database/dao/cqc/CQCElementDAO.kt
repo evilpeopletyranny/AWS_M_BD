@@ -1,9 +1,10 @@
-package database.dao
+package database.dao.cqc
 
-import database.entity.CQCElementDictionaryEntity
-import database.entity.CQCElementDictionaryTable
-import database.entity.CQCElementEntity
-import database.entity.CQCElementTable
+import database.dao.ICQCElementDAO
+import database.entity.cqc.CQCElementDictionaryEntity
+import database.entity.cqc.CQCElementDictionaryTable
+import database.entity.cqc.CQCElementEntity
+import database.entity.cqc.CQCElementTable
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import java.sql.SQLDataException

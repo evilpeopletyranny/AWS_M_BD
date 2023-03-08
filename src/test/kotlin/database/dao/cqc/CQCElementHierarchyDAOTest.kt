@@ -1,7 +1,8 @@
-package database.dao
+package database.dao.cqc
 
-import database.entity.CQCElementDictionaryEntity
-import database.entity.CQCElementHierarchyEntity
+import database.dao.IDAOTest
+import database.entity.cqc.CQCElementDictionaryEntity
+import database.entity.cqc.CQCElementHierarchyEntity
 import org.jetbrains.exposed.sql.StdOutSqlLogger
 import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -136,7 +137,8 @@ class CQCElementHierarchyDAOTest : IDAOTest {
 
             assertTrue { res.isNotEmpty() }
             assertEquals(res.size, limit)
-            assertEquals(hierarchy.sortedBy { it.childId.toString() }.take(limit),
+            assertEquals(
+                hierarchy.sortedBy { it.childId.toString() }.take(limit),
                 res.sortedBy { it.childId.toString() })
 
             rollback()
