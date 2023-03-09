@@ -1,8 +1,7 @@
-package database.dao.cqc
+package database.model.dao.repo
 
-import database.dao.ICQCElementHierarchyDAO
-import database.entity.cqc.CQCElementHierarchyEntity
-import database.entity.cqc.CQCElementHierarchyTable
+import database.model.dao.entity.CQCElementHierarchyEntity
+import database.model.dao.entity.CQCElementHierarchyTable
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import java.sql.SQLDataException

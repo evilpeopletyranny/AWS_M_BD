@@ -1,4 +1,4 @@
-package database.entity.cqc
+package database.model.dao.entity
 
 import org.jetbrains.exposed.sql.Table
 import java.util.*

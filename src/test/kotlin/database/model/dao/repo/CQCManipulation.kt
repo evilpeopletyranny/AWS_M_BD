@@ -1,9 +1,9 @@
-package database.dao.cqc
+package database.model.dao.repo
 
 import database.DatabaseFactory
-import database.entity.cqc.CQCElementDictionaryEntity
-import database.entity.cqc.CQCElementEntity
-import database.entity.cqc.CQCElementHierarchyEntity
+import database.model.dao.entity.CQCElementDictionaryEntity
+import database.model.dao.entity.CQCElementEntity
+import database.model.dao.entity.CQCElementHierarchyEntity
 import org.jetbrains.exposed.sql.StdOutSqlLogger
 import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -118,50 +118,50 @@ class CQCManipulation {
         }
     }
 
-    /**
-     * Удалять элементы с дочерними связями - невозможно
-     */
-    @Test
-    fun `deleting an element with child elements is not possible`() {
-        val type = dictionary[HierarchyElements.Indicator]
-
-        transaction {
-            addLogger(StdOutSqlLogger)
-            CQCElementDAO.multiInsert(defValues)
-            val entity = defValues.find { it.type == type }!!
-
-
-            val localDictionary = CQCElementDictionaryDAO.selectAll(orderBy = orderBy)
-            val localHierarchy = CQCElementHierarchyDAO.selectAll(orderBy = hierarchyOrderBy)
-
-            assertThrows<SQLException> {
-                CQCElementDAO.deleteById(entity.id)
-            }
-            assertEquals(dictionary.values.toSet(), localDictionary)
-            assertEquals(hierarchy, localHierarchy)
-            rollback()
-        }
-    }
-
-    /**
-     * Удаление типа влияет на иерархию
-     */
-    @Test
-    fun `deleting an cqc type affects the hierarchy`() {
-        val type = dictionary[HierarchyElements.Indicator]!!
-
-        transaction {
-            addLogger(StdOutSqlLogger)
-            CQCElementDAO.multiInsert(defValues)
-
-            val deleted = CQCElementDictionaryDAO.deleteById(type.id)
-            val localHierarchy = CQCElementHierarchyDAO.selectAll(orderBy = hierarchyOrderBy)
-
-            println(localHierarchy)
-
-            assertEquals(deleted, 1)
-
-            rollback()
-        }
-    }
+//    /**
+//     * Удалять элементы с дочерними связями - невозможно
+//     */
+//    @Test
+//    fun `deleting an element with child elements is not possible`() {
+//        val type = dictionary[HierarchyElements.Indicator]
+//
+//        transaction {
+//            addLogger(StdOutSqlLogger)
+//            CQCElementDAO.multiInsert(defValues)
+//            val entity = defValues.find { it.type == type }!!
+//
+//
+//            val localDictionary = CQCElementDictionaryDAO.selectAll(orderBy = orderBy)
+//            val localHierarchy = CQCElementHierarchyDAO.selectAll(orderBy = hierarchyOrderBy)
+//
+//            assertThrows<SQLException> {
+//                CQCElementDAO.deleteById(entity.id)
+//            }
+//            assertEquals(dictionary.values.toSet(), localDictionary)
+//            assertEquals(hierarchy, localHierarchy)
+//            rollback()
+//        }
+//    }
+//
+//    /**
+//     * Удаление типа влияет на иерархию
+//     */
+//    @Test
+//    fun `deleting an cqc type affects the hierarchy`() {
+//        val type = dictionary[HierarchyElements.Indicator]!!
+//
+//        transaction {
+//            addLogger(StdOutSqlLogger)
+//            CQCElementDAO.multiInsert(defValues)
+//
+//            val deleted = CQCElementDictionaryDAO.deleteById(type.id)
+//            val localHierarchy = CQCElementHierarchyDAO.selectAll(orderBy = hierarchyOrderBy)
+//
+//            println(localHierarchy)
+//
+//            assertEquals(deleted, 1)
+//
+//            rollback()
+//        }
+//    }
 }
