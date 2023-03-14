@@ -23,7 +23,8 @@ object CQCElementDictionaryDAO : ICQCElementDictionaryDAO {
      */
     private fun ResultRow.toCQCElementDictionaryEntity(): CQCElementDictionaryEntity = CQCElementDictionaryEntity(
         id = this[CQCElementDictionaryTable.id].value,
-        name = this[CQCElementDictionaryTable.name]
+        name = this[CQCElementDictionaryTable.name],
+        isDeleted = this[CQCElementDictionaryTable.isDeleted]
     )
 
     /**
@@ -71,6 +72,7 @@ object CQCElementDictionaryDAO : ICQCElementDictionaryDAO {
         val insertedCount = CQCElementDictionaryTable.insert {
             it[id] = element.id
             it[name] = element.name
+            it[isDeleted] = element.isDeleted
         }.insertedCount
 
         return if (insertedCount > 0) element.id else null
@@ -85,6 +87,7 @@ object CQCElementDictionaryDAO : ICQCElementDictionaryDAO {
         return CQCElementDictionaryTable.batchInsert(elements) {
             this[CQCElementDictionaryTable.id] = it.id
             this[CQCElementDictionaryTable.name] = it.name
+            this[CQCElementDictionaryTable.isDeleted] = it.isDeleted
         }
     }
 
@@ -106,6 +109,9 @@ object CQCElementDictionaryDAO : ICQCElementDictionaryDAO {
      */
     override fun update(element: CQCElementDictionaryEntity): Int {
         return CQCElementDictionaryTable.update({ CQCElementDictionaryTable.id eq element.id })
-        { it[name] = element.name }
+        {
+            it[name] = element.name
+            it[isDeleted] = element.isDeleted
+        }
     }
 }

@@ -14,6 +14,7 @@ val exposedVersion = "0.40.1"
 
 dependencies {
     testImplementation(kotlin("test"))
+    implementation("org.slf4j:slf4j-nop:1.7.30")
 
     implementation("org.jetbrains.exposed", "exposed-core", exposedVersion)
     implementation("org.jetbrains.exposed", "exposed-dao", exposedVersion)

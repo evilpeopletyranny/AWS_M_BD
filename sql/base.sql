@@ -1,11 +1,12 @@
 -- Словарь элементов ККХ
 create table cqc_elem_dict
 (
-    id   uuid unique  not null
+    id         uuid unique  not null
         constraint cqc_elem_dict_pk
             primary key,
-    name varchar(150) not null
-        unique
+    name       varchar(150) not null
+        unique,
+    is_deleted boolean      not null
 );
 
 -- Уровни иерархии элементов ККХ
@@ -20,7 +21,7 @@ create table cqc_elem_hierarchy
             references cqc_elem_dict
             on delete cascade,
     constraint child_parent_pk
-        primary key (child_type_id)
+        primary key (parent_type_id, child_type_id)
 );
 
 -- Триггер перестройки связей при вставке новых уровней в иерархию ККХ
@@ -82,7 +83,7 @@ create table cqc_elem
     parent_id uuid
         constraint parent_id_fk
             references cqc_elem,
-    type_id   uuid
+    type_id   uuid null
         constraint type_id_fk
             references cqc_elem_dict,
     value     varchar(250) unique

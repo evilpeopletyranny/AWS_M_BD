@@ -2,7 +2,6 @@ package database.model.dao.repo
 
 import database.model.dao.entity.CQCElementDictionaryEntity
 import database.model.dao.entity.CQCElementEntity
-import database.model.dao.entity.CQCElementHierarchyEntity
 import org.jetbrains.exposed.sql.ResultRow
 import java.util.*
 
@@ -22,7 +21,7 @@ sealed interface IDAO<EntityType> {
     fun selectAll(
         limit: Int = 100,
         offset: Long = 0,
-        orderBy: String,
+        orderBy: String = "id",
         order: String = "ASC"
     ): Set<EntityType>
 
@@ -79,10 +78,6 @@ sealed interface IDAO<EntityType> {
  */
 interface ICQCElementDictionaryDAO : IDAO<CQCElementDictionaryEntity>
 
-/**
- * Интерфейс DAO для взаимодействия с уровнями ККХ: cqc_elem_hierarchy
- */
-interface ICQCElementHierarchyDAO : IDAO<CQCElementHierarchyEntity>
 
 /**
  * Интерфейс DAO для взаимодействия ККХ: cqc_elem

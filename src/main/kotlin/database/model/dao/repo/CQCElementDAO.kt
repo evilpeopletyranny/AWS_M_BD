@@ -28,7 +28,8 @@ object CQCElementDAO : ICQCElementDAO {
         parentId = this[CQCElementTable.parentId]?.value,
         type = CQCElementDictionaryEntity(
             id = this[CQCElementDictionaryTable.id].value,
-            name = this[CQCElementDictionaryTable.name]
+            name = this[CQCElementDictionaryTable.name],
+            isDeleted = this[CQCElementDictionaryTable.isDeleted]
         ),
         value = this[CQCElementTable.value]
     )
@@ -59,6 +60,7 @@ object CQCElementDAO : ICQCElementDAO {
                 CQCElementTable.parentId,
                 CQCElementDictionaryTable.id,
                 CQCElementDictionaryTable.name,
+                CQCElementDictionaryTable.isDeleted,
                 CQCElementTable.value
             )
             .selectAll()
@@ -86,6 +88,7 @@ object CQCElementDAO : ICQCElementDAO {
                 CQCElementTable.parentId,
                 CQCElementDictionaryTable.id,
                 CQCElementDictionaryTable.name,
+                CQCElementDictionaryTable.isDeleted,
                 CQCElementTable.value
             )
             .select {

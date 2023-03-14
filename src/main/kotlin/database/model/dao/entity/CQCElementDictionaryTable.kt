@@ -8,6 +8,7 @@ import java.util.*
  */
 object CQCElementDictionaryTable : UUIDTable("cqc_elem_dict") {
     val name = varchar("name", 150)
+    val isDeleted = bool("is_deleted")
 }
 
 /**
@@ -15,5 +16,6 @@ object CQCElementDictionaryTable : UUIDTable("cqc_elem_dict") {
  */
 data class CQCElementDictionaryEntity(
     val id: UUID,
-    val name: String
+    val name: String,
+    val isDeleted: Boolean
 )
