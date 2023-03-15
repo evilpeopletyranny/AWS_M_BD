@@ -29,7 +29,13 @@ create or replace function hierarchy_insert_trigger() returns trigger
     language plpgsql
 as
 $$
-BEGIN
+begin
+	if (new.parent_type_id = (select parent_type_id from cqc_elem_hierarchy where child_type_id = new.child_type_id)) then 
+		raise exception 'Such record exists Parent: % - Child: %',
+			new.parent_type_id,
+			new.child_type_id;
+	end if;
+
     if (new.child_type_id in (select child_type_id from cqc_elem_hierarchy)) then
         update cqc_elem_hierarchy
         set child_type_id = new.parent_type_id
@@ -44,6 +50,7 @@ create trigger hierarchy_insert_trigger
     on cqc_elem_hierarchy
     for each row
 execute procedure hierarchy_insert_trigger();
+
 
 -- Триггер перестройки связей в иерархии при удалении уровня иерархии
 create or replace function hierarchy_delete_trigger() returns trigger
@@ -97,8 +104,11 @@ $$
 declare
     parentType uuid;
 
-begin
-    parentType = (select type_id from cqc_elem where id = new.parent_id);
+begin  
+   parentType = (select type_id from cqc_elem where id = new.parent_id);
+   
+
+  
     if (new.type_id in (select child_type_id from cqc_elem_hierarchy)
         and (
                 (parentType is null) or
@@ -119,6 +129,38 @@ create trigger cqc_element_insert_trigger
 execute procedure cqc_element_insert_trigger();
 
 drop trigger cqc_element_insert_trigger on cqc_elem;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 create table course
