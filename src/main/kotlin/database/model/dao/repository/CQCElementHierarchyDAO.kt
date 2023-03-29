@@ -1,7 +1,7 @@
-package database.model.dao.repo
+package database.model.dao.repository
 
 import database.model.dao.entity.CQCElementHierarchyEntity
-import database.model.dao.entity.CQCElementHierarchyTable
+import database.model.dao.table.CQCElementHierarchyTable
 import org.jetbrains.exposed.sql.*
 import java.util.*
 
@@ -35,6 +35,7 @@ object CQCElementHierarchyDAO : ICQCElementHierarchyDAO {
      *
      * @param firstPart parent_id
      * @param secondPart child_id
+     * @return кол-во удаленных записей
      */
     override fun deleteByPK(firstPart: UUID, secondPart: UUID): Int {
         return CQCElementHierarchyTable.deleteWhere {
@@ -80,18 +81,6 @@ object CQCElementHierarchyDAO : ICQCElementHierarchyDAO {
         return CQCElementHierarchyTable.batchInsert(elements) {
             this[CQCElementHierarchyTable.childId] = it.childId
             this[CQCElementHierarchyTable.parentId] = it.parentId
-        }
-    }
-
-    /**
-     * Обновление уровня иерархии
-     *
-     * @param entity уровень, который необходимо обновить
-     * @return кол-во обновленных записей
-     */
-    fun deleteHierarchyLevel(entity: CQCElementHierarchyEntity): Int {
-        return CQCElementHierarchyTable.deleteWhere {
-            Op.build { childId eq entity.childId and (parentId eq entity.parentId) }
         }
     }
 }

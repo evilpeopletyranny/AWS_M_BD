@@ -1,7 +1,7 @@
-package database.model.dao.repo
+package database.model.dao.repository
 
 import database.model.dao.entity.CQCElementDictionaryEntity
-import database.model.dao.entity.CQCElementDictionaryTable
+import database.model.dao.table.CQCElementDictionaryTable
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import java.sql.SQLDataException

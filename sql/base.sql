@@ -128,41 +128,6 @@ create trigger cqc_element_insert_trigger
     for each row
 execute procedure cqc_element_insert_trigger();
 
-drop trigger cqc_element_insert_trigger on cqc_elem;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 create table course
 (
     id   uuid         not null
@@ -183,9 +148,6 @@ create table course_input_leaf_link
             on delete cascade
 );
 
-alter table course_input_leaf_link
-    owner to postgres;
-
 create table course_output_leaf_link
 (
     course_id uuid not null
@@ -198,167 +160,80 @@ create table course_output_leaf_link
             on delete cascade
 );
 
-alter table course_output_leaf_link
-    owner to postgres;
-
-create function course_leaf_insert_trigger() returns trigger
-    language plpgsql
-as
-$$
-BEGIN
-    IF ((SELECT parent_type
-         FROM cqc_elem_hierarchy
-         WHERE parent_type =
-               (SELECT type FROM cqc_elem WHERE id = NEW.leaf_id)
-         LIMIT 1) IS NOT NULL) THEN
-        RAISE EXCEPTION 'invalid relationship';
-    END IF;
-    RETURN NEW;
-END;
+-- Проверка, что переданный тип является листом.
+create or replace function is_leaf_type(elem_type_id uuid) returns boolean  language plpgsql as $$
+begin 
+	if ((select child_type_id from cqc_elem_hierarchy where parent_type_id = elem_type_id limit 1) is null) 
+		then return true;
+	else return false;
+	end if;
+end
 $$;
 
-alter function course_leaf_insert_trigger() owner to postgres;
+-- Получение элементов ККХ, входящих в данный курс
+create or replace function get_input_elements(c_id uuid) returns table(elem_id uuid, elem_parent_id uuid, type_id uuid, type_name character varying, type_id_deleted boolean, elem_value character varying) language plpgsql as $$
+declare
+	childs uuid[];
+	res_id uuid[];
+	elem uuid;
+	
+begin
+	-- Получение id элементов, которые напрямую связаны с курсом.
+	-- Имеют отношения в таблице связи (course_input_leaf_link).
+	childs := ARRAY(select leaf_id from course_input_leaf_link where course_id = c_id);
+	res_id := childs;
 
-create function cqc_elem_insert_trigger() returns trigger
-    language plpgsql
-as
-$$
-DECLARE
-    parentType uuid;
-    temp       uuid;
+	-- 1. Определяем предпоследние элементы иерархии (имеют связь только с листами).
+	-- 2. Выбираем листовые элементы через ссылку на родителя, полученные в 1.
+	foreach elem in array childs
+	loop
+		if (select * from is_leaf_type( 
+			(select child_type_id from cqc_elem_hierarchy where parent_type_id =
+			(select el.type_id from cqc_elem el where el.id = elem) limit 1))) then 
+		res_id := res_id || array(select id from cqc_elem where parent_id = elem);
+		end if;
+	end loop;
 
-BEGIN
-    IF (NEW.parent_id IS NOT NULL) THEN
-        parentType := (SELECT cqc_elem.type
-                       FROM cqc_elem
-                       WHERE id = NEW.parent_id);
-
-        temp := (SELECT cqc_elem_hierarchy.parent_type
-                 FROM cqc_elem_hierarchy
-                 WHERE child_type = NEW.type);
-
-        IF (temp IS NULL OR parentType <> temp) THEN
-            RAISE EXCEPTION 'invalid relationship';
-        END IF;
-    END IF;
-    RETURN NEW;
-END ;
+	-- Возвращаем все ходящие в курс элементы ККХ вместе с данными об их типе.
+	return query
+		select el.id, el.parent_id, dict.id, dict."name", dict.is_deleted, el.value from cqc_elem el 
+		left join cqc_elem_dict dict 
+		on el.type_id = dict.id
+		where el.id = any(res_id);
+end
 $$;
 
-alter function cqc_elem_insert_trigger() owner to postgres;
+-- Получение исходящих из данного курса элементов ККХ
+create or replace function get_output_elements(c_id uuid) returns table(elem_id uuid, elem_parent_id uuid, type_id uuid, type_name character varying, type_id_deleted boolean, elem_value character varying) language plpgsql as $$
+declare
+	childs uuid[];
+	res_id uuid[];
+	elem uuid;
+	
+begin
+	-- Получение id элементов, которые напрямую связаны с курсом.
+	-- Имеют отношения в таблице связи (course_output_leaf_link).
+	childs := ARRAY(select leaf_id from course_output_leaf_link where course_id = c_id);
+	res_id := childs;
 
-create function get_course_parts(courseid uuid)
-    returns TABLE
-            (
-                id        uuid,
-                parent_id uuid,
-                type      uuid,
-                value     character varying
-            )
-    language plpgsql
-as
-$$
-DECLARE
-    temp    UUID;
-    res     UUID[];
-    leafArr UUID[];
+	-- 1. Определяем предпоследние элементы иерархии (имеют связь только с листами).
+	-- 2. Выбираем листовые элементы через ссылку на родителя, полученные в 1.
+	foreach elem in array childs
+	loop
+		if (select * from is_leaf_type( 
+			(select child_type_id from cqc_elem_hierarchy where parent_type_id =
+			(select el.type_id from cqc_elem el where el.id = elem) limit 1))) then 
+		res_id := res_id || array(select id from cqc_elem where parent_id = elem);
+		end if;
+	end loop;
 
-BEGIN
-    CREATE TEMP TABLE steps
-    (
-        stepNumber SERIAL,
-        step       UUID[]
-    );
+	-- Возвращаем все выходные из курса элементы ККХ вместе с данными об их типе.
+	return query
+		select el.id, el.parent_id, dict.id, dict."name", dict.is_deleted, el.value from cqc_elem el 
+		left join cqc_elem_dict dict 
+		on el.type_id = dict.id
+		where el.id = any(res_id);
+end
+$$;		
 
-    leafArr := (SELECT id
-                FROM cqc_elem
-                         LEFT JOIN course_output_leaf_link ON id = leaf_id
-                WHERE courseId = courseId);
-
-    INSERT INTO steps(step)
-    VALUES (leafArr);
-
-    res := leafArr;
-
-    WHILE (NOT ((SELECT step FROM steps ORDER BY stepNumber DESC LIMIT 1) = '{}'))
-        LOOP
-            DECLARE
-                tempArr UUID[];
-
-            BEGIN
-                FOREACH temp IN ARRAY (SELECT step FROM steps ORDER BY stepNumber DESC LIMIT 1)
-                    LOOP
-                        tempArr := ARRAY(SELECT cqc_elem.parent_id
-                                         FROM cqc_elem
-                                         WHERE cqc_elem.parent_id IS NOT NULL
-                                           AND cqc_elem.id = temp);
-
-                        res := array_cat(res, tempArr);
-                        INSERT INTO steps(step) VALUES (tempArr);
-                    END LOOP;
-            END;
-        END LOOP;
-    DROP TABLE steps;
-
-    RETURN QUERY (SELECT * FROM cqc_elem WHERE cqc_elem.id IN (SELECT DISTINCT r FROM unnest(res) AS result(r)));
-END;
-$$;
-
-alter function get_course_parts(uuid) owner to postgres;
-
-create function get_course_parts(courseid uuid)
-    returns TABLE
-            (
-                id        uuid,
-                parent_id uuid,
-                type      uuid,
-                value     character varying
-            )
-    language plpgsql
-as
-$$
-DECLARE
-    temp    UUID;
-    res     UUID[];
-    leafArr UUID[];
-
-BEGIN
-    CREATE TEMP TABLE steps
-    (
-        stepNumber SERIAL,
-        step       UUID[]
-    );
-
-    leafArr := (SELECT id
-                FROM cqc_elem
-                         LEFT JOIN course_output_leaf_link ON id = leaf_id
-                WHERE courseId = courseId);
-
-    INSERT INTO steps(step)
-    VALUES (leafArr);
-
-    res := leafArr;
-
-    WHILE (NOT ((SELECT step FROM steps ORDER BY stepNumber DESC LIMIT 1) = '{}'))
-        LOOP
-            DECLARE
-                tempArr UUID[];
-
-            BEGIN
-                FOREACH temp IN ARRAY (SELECT step FROM steps ORDER BY stepNumber DESC LIMIT 1)
-                    LOOP
-                        tempArr := ARRAY(SELECT cqc_elem.parent_id
-                                         FROM cqc_elem
-                                         WHERE cqc_elem.parent_id IS NOT NULL
-                                           AND cqc_elem.id = temp);
-
-                        res := array_cat(res, tempArr);
-                        INSERT INTO steps(step) VALUES (tempArr);
-                    END LOOP;
-            END;
-        END LOOP;
-    DROP TABLE steps;
-
-    RETURN QUERY (SELECT * FROM cqc_elem WHERE cqc_elem.id IN (SELECT DISTINCT r FROM unnest(res) AS result(r)));
-END;
-$$;
+select * from get_input_elements('87db90d6-6d82-4a68-87c6-97bcf953d39a')

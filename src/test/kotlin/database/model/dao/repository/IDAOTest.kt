@@ -1,4 +1,4 @@
-package database.model.dao.repo
+package database.model.dao.repository
 
 import database.DatabaseFactory
 import org.junit.jupiter.api.BeforeAll

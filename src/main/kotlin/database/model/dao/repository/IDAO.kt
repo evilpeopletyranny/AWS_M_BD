@@ -1,7 +1,8 @@
-package database.model.dao.repo
+package database.model.dao.repository
 
 import database.model.dao.entity.CQCElementDictionaryEntity
 import database.model.dao.entity.CQCElementEntity
+import database.model.dao.entity.CourseEntity
 import org.jetbrains.exposed.sql.ResultRow
 import java.util.*
 
@@ -83,3 +84,8 @@ interface ICQCElementDictionaryDAO : IDAO<CQCElementDictionaryEntity>
  * Интерфейс DAO для взаимодействия ККХ: cqc_elem
  */
 interface ICQCElementDAO : IDAO<CQCElementEntity>
+
+/**
+ * Интерфейс DAO для взаимодействия с таблицей Курсов: course
+ */
+interface ICourseDAO : IDAO<CourseEntity>

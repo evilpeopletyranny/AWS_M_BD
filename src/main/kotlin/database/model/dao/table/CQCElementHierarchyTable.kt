@@ -1,7 +1,6 @@
-package database.model.dao.entity
+package database.model.dao.table
 
 import org.jetbrains.exposed.sql.Table
-import java.util.*
 
 /**
  * Таблица уровней иерархии ККХ
@@ -12,11 +11,3 @@ object CQCElementHierarchyTable : Table("cqc_elem_hierarchy") {
 
     override val primaryKey = PrimaryKey(childId, parentId, name = "child_parent_pk")
 }
-
-/**
- * Отображение уровня иерархии ККХ
- */
-data class CQCElementHierarchyEntity(
-    val parentId: UUID,
-    val childId: UUID
-)

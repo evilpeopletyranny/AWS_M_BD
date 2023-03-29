@@ -1,4 +1,4 @@
-package database.model.dao.repo
+package database.model.dao.repository
 
 import database.model.dao.entity.CQCElementDictionaryEntity
 import database.model.dao.entity.CQCElementHierarchyEntity
@@ -384,7 +384,7 @@ class CQCElementHierarchyDAOTest : IDAOTest {
         transaction {
             addLogger(StdOutSqlLogger)
             CQCElementHierarchyDAO.multiInsert(hierarchy)
-            val deleted = CQCElementHierarchyDAO.deleteHierarchyLevel(hierarchyTop)
+            val deleted = CQCElementHierarchyDAO.deleteByPK(hierarchyTop.parentId, hierarchyTop.childId)
 
             val res = CQCElementHierarchyDAO.selectAll()
 
@@ -427,7 +427,7 @@ class CQCElementHierarchyDAOTest : IDAOTest {
             addLogger(StdOutSqlLogger)
             CQCElementDictionaryDAO.insert(newDictionaryElem)
             CQCElementHierarchyDAO.multiInsert(localHierarchy)
-            val deleted = CQCElementHierarchyDAO.deleteHierarchyLevel(hierarchyMiddle)
+            val deleted = CQCElementHierarchyDAO.deleteByPK(hierarchyMiddle.parentId, hierarchyMiddle.childId)
 
             val res = CQCElementHierarchyDAO.selectAll()
 
@@ -449,7 +449,7 @@ class CQCElementHierarchyDAOTest : IDAOTest {
         transaction {
             addLogger(StdOutSqlLogger)
             CQCElementHierarchyDAO.multiInsert(hierarchy)
-            val deleted = CQCElementHierarchyDAO.deleteHierarchyLevel(hierarchyBot)
+            val deleted = CQCElementHierarchyDAO.deleteByPK(hierarchyBot.parentId, hierarchyBot.childId)
 
             val res = CQCElementHierarchyDAO.selectAll()
 

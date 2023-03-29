@@ -1,4 +1,4 @@
-package database.model.dao.repo
+package database.model.dao.repository
 
 import database.model.dao.entity.CQCElementDictionaryEntity
 import database.model.dao.entity.CQCElementEntity
@@ -57,7 +57,7 @@ class CQCElementDAOTest : IDAOTest {
             dictionary[HierarchyElements.Competence]!!,
             "Competence1"
         )
-        val indicator = CQCElementEntity(
+        private val indicator = CQCElementEntity(
             UUID.randomUUID(),
             competence.id,
             dictionary[HierarchyElements.Indicator]!!,
@@ -106,7 +106,7 @@ class CQCElementDAOTest : IDAOTest {
             transaction {
                 addLogger(StdOutSqlLogger)
                 dictionary.values.forEach { CQCElementDictionaryDAO.deleteById(it.id) }
-                hierarchy.forEach { CQCElementHierarchyDAO.deleteHierarchyLevel(it) }
+                hierarchy.forEach { CQCElementHierarchyDAO.deleteByPK(it.parentId, it.childId) }
             }
         }
     }

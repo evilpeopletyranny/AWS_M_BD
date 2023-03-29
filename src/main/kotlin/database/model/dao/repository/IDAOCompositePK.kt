@@ -1,6 +1,8 @@
-package database.model.dao.repo
+package database.model.dao.repository
 
 import database.model.dao.entity.CQCElementHierarchyEntity
+import database.model.dao.entity.CourseInputLeafEntity
+import database.model.dao.entity.CourseOutputLeafEntity
 import org.jetbrains.exposed.sql.ResultRow
 import java.util.*
 
@@ -61,3 +63,13 @@ sealed interface IDAOCompositePK<EntityType> {
  * Интерфейс DAO для взаимодействия с уровнями ККХ: cqc_elem_hierarchy
  */
 interface ICQCElementHierarchyDAO : IDAOCompositePK<CQCElementHierarchyEntity>
+
+/**
+ * Интерфейс DAO для взаимодействия с таблицей связи курсов и входных элементов ККХ: course_input_leaf_link
+ */
+interface ICourseInputLeafDAO : IDAOCompositePK<CourseInputLeafEntity>
+
+/**
+ * Интерфейс DAO для взаимодействия с таблицей связи курсов и выходных элементов ККХ: course_output_leaf_link
+ */
+interface ICourseOutputLeafDAO : IDAOCompositePK<CourseOutputLeafEntity>

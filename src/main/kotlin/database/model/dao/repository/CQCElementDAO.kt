@@ -1,9 +1,9 @@
-package database.model.dao.repo
+package database.model.dao.repository
 
 import database.model.dao.entity.CQCElementDictionaryEntity
-import database.model.dao.entity.CQCElementDictionaryTable
+import database.model.dao.table.CQCElementDictionaryTable
 import database.model.dao.entity.CQCElementEntity
-import database.model.dao.entity.CQCElementTable
+import database.model.dao.table.CQCElementTable
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import java.sql.SQLDataException
@@ -23,7 +23,7 @@ object CQCElementDAO : ICQCElementDAO {
     /**
      * Перевод результатов SQL запроса в отображение CQCElementHierarchyEntity
      */
-    private fun ResultRow.toCQCElementEntity(): CQCElementEntity = CQCElementEntity(
+     fun ResultRow.toCQCElementEntity(): CQCElementEntity = CQCElementEntity(
         id = this[CQCElementTable.id].value,
         parentId = this[CQCElementTable.parentId]?.value,
         type = CQCElementDictionaryEntity(

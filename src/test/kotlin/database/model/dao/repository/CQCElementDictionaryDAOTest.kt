@@ -1,4 +1,4 @@
-package database.model.dao.repo
+package database.model.dao.repository
 
 import database.model.dao.entity.CQCElementDictionaryEntity
 import org.jetbrains.exposed.sql.StdOutSqlLogger
