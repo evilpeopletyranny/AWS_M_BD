@@ -7,10 +7,8 @@ import database.model.dao.entity.CourseEntity
 import org.jetbrains.exposed.sql.StdOutSqlLogger
 import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.transactions.transaction
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.DisplayName
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.*
+import java.sql.SQLException
 import java.util.*
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -41,16 +39,16 @@ class CourseDAOTest : IDAOTest {
 
         private val hierarchy = setOf(
             CQCElementHierarchyEntity(
-                dictionary[HierarchyElements.Competence]!!.id, dictionary[HierarchyElements.Indicator]!!.id
+                dictionary[HierarchyElements.Competence]!!, dictionary[HierarchyElements.Indicator]!!
             ),
             CQCElementHierarchyEntity(
-                dictionary[HierarchyElements.Indicator]!!.id, dictionary[HierarchyElements.Knowledge]!!.id
+                dictionary[HierarchyElements.Indicator]!!, dictionary[HierarchyElements.Knowledge]!!
             ),
             CQCElementHierarchyEntity(
-                dictionary[HierarchyElements.Indicator]!!.id, dictionary[HierarchyElements.Ability]!!.id
+                dictionary[HierarchyElements.Indicator]!!, dictionary[HierarchyElements.Ability]!!
             ),
             CQCElementHierarchyEntity(
-                dictionary[HierarchyElements.Indicator]!!.id, dictionary[HierarchyElements.Skill]!!.id
+                dictionary[HierarchyElements.Indicator]!!, dictionary[HierarchyElements.Skill]!!
             ),
         )
 
@@ -175,66 +173,75 @@ class CourseDAOTest : IDAOTest {
             CourseEntity(
                 id = UUID.randomUUID(),
                 name = "Курс1",
-                inputLeafs = mapOf(
+                inputLeafs = linkedMapOf(
                     dictionary[HierarchyElements.Competence]!! to setOf(competence1),
                     dictionary[HierarchyElements.Indicator]!! to setOf(indicator11),
                     dictionary[HierarchyElements.Knowledge]!! to setOf(knowledge111, knowledge112),
                     dictionary[HierarchyElements.Ability]!! to setOf(ability111),
                     dictionary[HierarchyElements.Skill]!! to setOf(skill111, skill112),
                 ),
-                outputLeafs = mapOf(
+                outputLeafs = linkedMapOf(
                     dictionary[HierarchyElements.Competence]!! to setOf(competence2),
-                    dictionary[HierarchyElements.Indicator]!! to setOf(indicator21)
+                    dictionary[HierarchyElements.Indicator]!! to setOf(indicator22),
+                    dictionary[HierarchyElements.Knowledge]!! to setOf(knowledge221),
+                    dictionary[HierarchyElements.Ability]!! to setOf(ability221, ability222),
+                    dictionary[HierarchyElements.Skill]!! to setOf(skill221, skill222)
                 )
             ),
-//            CourseEntity(
-//                id = UUID.randomUUID(),
-//                name = "Курс2",
-//                inputLeafs = mapOf(
-//                    dictionary[HierarchyElements.Competence]!! to competence1,
-//                    dictionary[HierarchyElements.Indicator]!! to indicator12
-//                ),
-//                outputLeafs = mapOf(
-//                    dictionary[HierarchyElements.Competence]!! to competence2,
-//                    dictionary[HierarchyElements.Indicator]!! to indicator22
-//                )
-//            ),
-//            CourseEntity(
-//                id = UUID.randomUUID(),
-//                name = "Курс3",
-//                inputLeafs = mapOf(
-//                    dictionary[HierarchyElements.Competence]!! to competence2,
-//                    dictionary[HierarchyElements.Indicator]!! to indicator22
-//                ),
-//                outputLeafs = mapOf(
-//                    dictionary[HierarchyElements.Competence]!! to competence1,
-//                    dictionary[HierarchyElements.Indicator]!! to indicator11
-//                )
-//            ),
-//            CourseEntity(
-//                id = UUID.randomUUID(),
-//                name = "Курс4",
-//                inputLeafs = mapOf(
-//                    dictionary[HierarchyElements.Competence]!! to competence2,
-//                    dictionary[HierarchyElements.Indicator]!! to indicator22
-//                ),
-//                outputLeafs = mapOf(
-//                    dictionary[HierarchyElements.Competence]!! to competence1,
-//                    dictionary[HierarchyElements.Indicator]!! to indicator13
-//                )
-//            ),
-//            CourseEntity(
-//                id = UUID.randomUUID(),
-//                name = "Курс5",
-//                inputLeafs = mapOf(
-//                    dictionary[HierarchyElements.Competence]!! to competence1,
-//                    dictionary[HierarchyElements.Indicator]!! to indicator13
-//                ),
-//                outputLeafs = mapOf(
-//                    dictionary[HierarchyElements.Competence]!! to competence2,
-//                    dictionary[HierarchyElements.Indicator]!! to indicator22
-//                )
-//            ),
+            CourseEntity(
+                id = UUID.randomUUID(),
+                name = "Курс2",
+                inputLeafs = linkedMapOf(
+                    dictionary[HierarchyElements.Competence]!! to setOf(competence1),
+                    dictionary[HierarchyElements.Indicator]!! to setOf(indicator11),
+                    dictionary[HierarchyElements.Knowledge]!! to setOf(knowledge111, knowledge112),
+                    dictionary[HierarchyElements.Ability]!! to setOf(ability111),
+                    dictionary[HierarchyElements.Skill]!! to setOf(skill111, skill112),
+                ),
+                outputLeafs = linkedMapOf(
+                    dictionary[HierarchyElements.Competence]!! to setOf(competence2),
+                    dictionary[HierarchyElements.Indicator]!! to setOf(indicator21),
+                )
+            ),
+            CourseEntity(
+                id = UUID.randomUUID(),
+                name = "Курс3",
+                inputLeafs = linkedMapOf(
+                    dictionary[HierarchyElements.Competence]!! to setOf(competence1),
+                    dictionary[HierarchyElements.Indicator]!! to setOf(indicator12),
+                ),
+                outputLeafs = linkedMapOf(
+                    dictionary[HierarchyElements.Competence]!! to setOf(competence2),
+                    dictionary[HierarchyElements.Indicator]!! to setOf(indicator22),
+                    dictionary[HierarchyElements.Knowledge]!! to setOf(knowledge221),
+                    dictionary[HierarchyElements.Ability]!! to setOf(ability221, ability222),
+                    dictionary[HierarchyElements.Skill]!! to setOf(skill221, skill222)
+                )
+            ),
+            CourseEntity(
+                id = UUID.randomUUID(),
+                name = "Курс4",
+                inputLeafs = linkedMapOf(
+                    dictionary[HierarchyElements.Competence]!! to setOf(competence1),
+                    dictionary[HierarchyElements.Indicator]!! to setOf(indicator13),
+                ),
+                outputLeafs = linkedMapOf(
+                    dictionary[HierarchyElements.Competence]!! to setOf(competence2),
+                    dictionary[HierarchyElements.Indicator]!! to setOf(indicator21),
+                )
+            ),
+            CourseEntity(
+                id = UUID.randomUUID(),
+                name = "Курс5",
+                inputLeafs = linkedMapOf(
+                    dictionary[HierarchyElements.Competence]!! to setOf(competence2),
+                    dictionary[HierarchyElements.Indicator]!! to setOf(indicator21),
+                ),
+                outputLeafs = linkedMapOf(
+                    dictionary[HierarchyElements.Competence]!! to setOf(competence1),
+                    dictionary[HierarchyElements.Indicator]!! to setOf(indicator12),
+                )
+            ),
         )
 
         @JvmStatic
@@ -254,7 +261,7 @@ class CourseDAOTest : IDAOTest {
             transaction {
                 addLogger(StdOutSqlLogger)
                 cqcElements.reversed().forEach { CQCElementDAO.deleteById(it.id) }
-                hierarchy.forEach { CQCElementHierarchyDAO.deleteByPK(it.parentId, it.childId) }
+                hierarchy.forEach { CQCElementHierarchyDAO.deleteByPK(it.parent.id, it.child.id) }
                 dictionary.values.forEach { CQCElementDictionaryDAO.deleteById(it.id) }
             }
         }
@@ -269,21 +276,487 @@ class CourseDAOTest : IDAOTest {
 
             val id = CourseDAO.insert(entity)
             val res = CourseDAO.selectById(entity.id)
-//           val res = CourseDAO.selectById(UUID.fromString("87db90d6-6d82-4a68-87c6-97bcf953d39a"))
-
-//            println()
-//            entity.inputLeafs.values.forEach { println(it.value) }
-//            println()
-//            res!!.inputLeafs.values.forEach { println(it.value) }
-//            println()
-//            CourseDAO.selectById(entity.id)!!.inputLeafs.values.forEach { println(it) }
-
-
 
             assertEquals(entity.id, id)
             assertTrue { res != null }
             assertEquals(res, entity)
 
+            rollback()
+        }
+    }
+
+    @Test
+    @DisplayName("Unsuccessful insertion of one record - hierarchy violation: does not have a top level hierarchy")
+    fun `element not created, because does not have a top level hierarchy`() {
+        val invalidCourse = CourseEntity(
+            id = UUID.randomUUID(),
+            name = "Неверный курс",
+            inputLeafs = linkedMapOf(
+                dictionary[HierarchyElements.Indicator]!! to setOf(indicator11),
+                dictionary[HierarchyElements.Knowledge]!! to setOf(knowledge111, knowledge112),
+                dictionary[HierarchyElements.Ability]!! to setOf(ability111),
+                dictionary[HierarchyElements.Skill]!! to setOf(skill111, skill112),
+            ),
+            outputLeafs = linkedMapOf(
+                dictionary[HierarchyElements.Indicator]!! to setOf(indicator22),
+                dictionary[HierarchyElements.Knowledge]!! to setOf(knowledge221),
+                dictionary[HierarchyElements.Ability]!! to setOf(ability221, ability222),
+                dictionary[HierarchyElements.Skill]!! to setOf(skill221, skill222)
+            )
+        )
+
+        transaction {
+            assertThrows<SQLException> {
+                CourseDAO.insert(invalidCourse)
+            }
+
+            rollback()
+        }
+    }
+
+    @Test
+    @DisplayName("Unsuccessful insertion of one record - hierarchy violation: skipping a hierarchy level")
+    fun `element was not created because a hierarchy level was skipped`() {
+        val invalidCourse = CourseEntity(
+            id = UUID.randomUUID(),
+            name = "Неверный курс",
+            inputLeafs = linkedMapOf(
+                dictionary[HierarchyElements.Competence]!! to setOf(competence1),
+                dictionary[HierarchyElements.Knowledge]!! to setOf(knowledge111, knowledge112),
+                dictionary[HierarchyElements.Ability]!! to setOf(ability111),
+                dictionary[HierarchyElements.Skill]!! to setOf(skill111, skill112),
+            ),
+            outputLeafs = linkedMapOf(
+                dictionary[HierarchyElements.Competence]!! to setOf(competence2),
+                dictionary[HierarchyElements.Knowledge]!! to setOf(knowledge221),
+                dictionary[HierarchyElements.Ability]!! to setOf(ability221, ability222),
+                dictionary[HierarchyElements.Skill]!! to setOf(skill221, skill222)
+            )
+        )
+
+        transaction {
+            assertThrows<SQLException> {
+                CourseDAO.insert(invalidCourse)
+            }
+
+            rollback()
+        }
+    }
+
+    @Test
+    @DisplayName("Unsuccessful insertion of one record - hierarchy violation: association only with leafs")
+    fun `element was not created because it only has an association with leafs`() {
+        val invalidCourse = CourseEntity(
+            id = UUID.randomUUID(),
+            name = "Неверный курс",
+            inputLeafs = linkedMapOf(
+                dictionary[HierarchyElements.Knowledge]!! to setOf(knowledge111, knowledge112),
+                dictionary[HierarchyElements.Ability]!! to setOf(ability111),
+                dictionary[HierarchyElements.Skill]!! to setOf(skill111, skill112),
+            ),
+            outputLeafs = linkedMapOf(
+                dictionary[HierarchyElements.Knowledge]!! to setOf(knowledge221),
+                dictionary[HierarchyElements.Ability]!! to setOf(ability221, ability222),
+                dictionary[HierarchyElements.Skill]!! to setOf(skill221, skill222)
+            )
+        )
+
+        transaction {
+            assertThrows<SQLException> {
+                CourseDAO.insert(invalidCourse)
+            }
+
+            rollback()
+        }
+    }
+
+    @Test
+    @DisplayName("Successful insertion of multiple values")
+    fun `successful creation of an entity set`() {
+        transaction {
+            addLogger(StdOutSqlLogger)
+
+            CourseDAO.multiInsert(defValues)
+            val res = CourseDAO.selectAll()
+
+            assertTrue { res.isNotEmpty() }
+            assertEquals(defValues, res.sortedBy { it.name }.toSet())
+
+            rollback()
+        }
+    }
+
+    @Test
+    @DisplayName("Unsuccessful insertion multiple records - hierarchy violation: does not have a top level hierarchy")
+    fun `entity set was not created, because does not have a top level hierarchy`() {
+        val invalidCourse = CourseEntity(
+            id = UUID.randomUUID(),
+            name = "Неверный курс",
+            inputLeafs = linkedMapOf(
+                dictionary[HierarchyElements.Indicator]!! to setOf(indicator11),
+                dictionary[HierarchyElements.Knowledge]!! to setOf(knowledge111, knowledge112),
+                dictionary[HierarchyElements.Ability]!! to setOf(ability111),
+                dictionary[HierarchyElements.Skill]!! to setOf(skill111, skill112),
+            ),
+            outputLeafs = linkedMapOf(
+                dictionary[HierarchyElements.Indicator]!! to setOf(indicator22),
+                dictionary[HierarchyElements.Knowledge]!! to setOf(knowledge221),
+                dictionary[HierarchyElements.Ability]!! to setOf(ability221, ability222),
+                dictionary[HierarchyElements.Skill]!! to setOf(skill221, skill222)
+            )
+        )
+        val values = defValues + invalidCourse
+
+        transaction {
+            addLogger(StdOutSqlLogger)
+
+            assertThrows<SQLException> {
+                CourseDAO.multiInsert(values)
+            }
+
+            rollback()
+        }
+    }
+
+    @Test
+    @DisplayName("Unsuccessful insertion multiple records - hierarchy violation: hierarchy violation: skipping a hierarchy level")
+    fun `entity set was not created, because a hierarchy level was skipped`() {
+        val invalidCourse = CourseEntity(
+            id = UUID.randomUUID(),
+            name = "Неверный курс",
+            inputLeafs = linkedMapOf(
+                dictionary[HierarchyElements.Competence]!! to setOf(competence1),
+                dictionary[HierarchyElements.Knowledge]!! to setOf(knowledge111, knowledge112),
+                dictionary[HierarchyElements.Ability]!! to setOf(ability111),
+                dictionary[HierarchyElements.Skill]!! to setOf(skill111, skill112),
+            ),
+            outputLeafs = linkedMapOf(
+                dictionary[HierarchyElements.Competence]!! to setOf(competence2),
+                dictionary[HierarchyElements.Knowledge]!! to setOf(knowledge221),
+                dictionary[HierarchyElements.Ability]!! to setOf(ability221, ability222),
+                dictionary[HierarchyElements.Skill]!! to setOf(skill221, skill222)
+            )
+        )
+        val values = defValues + invalidCourse
+
+        transaction {
+            addLogger(StdOutSqlLogger)
+
+            assertThrows<SQLException> {
+                CourseDAO.multiInsert(values)
+            }
+
+            rollback()
+        }
+    }
+
+    @Test
+    @DisplayName("Unsuccessful insertion multiple records - hierarchy violation:  association only with leafs")
+    fun `entity set was not created, because it only has an association with leafs`() {
+        val invalidCourse = CourseEntity(
+            id = UUID.randomUUID(),
+            name = "Неверный курс",
+            inputLeafs = linkedMapOf(
+                dictionary[HierarchyElements.Knowledge]!! to setOf(knowledge111, knowledge112),
+                dictionary[HierarchyElements.Ability]!! to setOf(ability111),
+                dictionary[HierarchyElements.Skill]!! to setOf(skill111, skill112),
+            ),
+            outputLeafs = linkedMapOf(
+                dictionary[HierarchyElements.Knowledge]!! to setOf(knowledge221),
+                dictionary[HierarchyElements.Ability]!! to setOf(ability221, ability222),
+                dictionary[HierarchyElements.Skill]!! to setOf(skill221, skill222)
+            )
+        )
+        val values = defValues + invalidCourse
+
+        transaction {
+            addLogger(StdOutSqlLogger)
+
+            assertThrows<SQLException> {
+                CourseDAO.multiInsert(values)
+            }
+
+            rollback()
+        }
+    }
+
+    @Test
+    @DisplayName("Successful select all elements without search parameters")
+    fun `select all without parameters`() {
+        transaction {
+            addLogger(StdOutSqlLogger)
+            CourseDAO.multiInsert(defValues)
+
+            val res = CourseDAO.selectAll()
+
+            assertTrue { res.isNotEmpty() }
+            assertEquals(res.size, defValues.size)
+            assertEquals(defValues, res)
+
+            rollback()
+        }
+    }
+
+    @Test
+    @DisplayName("Successfully select a limited number of elements")
+    fun `select all with limit`() {
+        val limit = 3
+
+        transaction {
+            addLogger(StdOutSqlLogger)
+            CourseDAO.multiInsert(defValues)
+
+            val res = CourseDAO.selectAll(limit = limit)
+
+            assertTrue { res.isNotEmpty() }
+            assertEquals(res.size, limit)
+            assertEquals(
+                defValues.sortedBy { it.id.toString() }.take(limit).toSet(),
+                res
+            )
+
+            rollback()
+        }
+    }
+
+    @Test
+    @DisplayName("Successfully select with all search options")
+    fun `select all with all search options`() {
+        val limit = 3
+        val offset = 1
+        val orderBy = "name"
+        val order = "DESC"
+
+        transaction {
+            addLogger(StdOutSqlLogger)
+            CourseDAO.multiInsert(defValues)
+
+            val res = CourseDAO.selectAll(limit, offset.toLong(), orderBy, order)
+
+            assertTrue { res.isNotEmpty() }
+            assertEquals(res.size, limit)
+            assertEquals(
+                defValues.sortedBy { it.name }.reversed().subList(offset, limit + offset).toSet(),
+                res
+            )
+
+            rollback()
+        }
+    }
+
+    @Test
+    @DisplayName("Successfully select of one record")
+    fun `select by id`() {
+        transaction {
+            addLogger(StdOutSqlLogger)
+            val entity = defValues.first()
+            val resId = CourseDAO.insert(entity)
+            val res = resId?.let { CourseDAO.selectById(it) }
+
+            assertEquals(entity.id, resId)
+            assertTrue { res != null }
+            assertEquals(res, entity)
+
+            rollback()
+        }
+    }
+
+    @Test
+    @DisplayName("Unsuccessfully select of one record - non-existent id")
+    fun `unsuccessfully select by id`() {
+        transaction {
+            addLogger(StdOutSqlLogger)
+
+            CourseDAO.multiInsert(defValues)
+            val res = CourseDAO.selectById(UUID.randomUUID())
+
+            assertTrue { res == null }
+
+            rollback()
+        }
+    }
+
+    @Test
+    @DisplayName("Successful update of course parameter")
+    fun `successful course parameter update`() {
+        transaction {
+            addLogger(StdOutSqlLogger)
+            CourseDAO.multiInsert(defValues)
+            val fromBD = CourseDAO.selectById(defValues.last().id) ?: throw SQLException("Entity not created")
+
+            val forUpdate = CourseEntity(
+                id = fromBD.id,
+                name = "Курс с новым именем",
+                inputLeafs = fromBD.inputLeafs,
+                outputLeafs = fromBD.outputLeafs
+            )
+
+            val updated = CourseDAO.update(forUpdate)
+            val res = CourseDAO.selectById(forUpdate.id)
+
+            assertTrue { res != null }
+            assertTrue { updated == 1 }
+            assertEquals(forUpdate, res)
+
+            rollback()
+        }
+    }
+
+    @Test
+    @DisplayName("Successful update of course links")
+    fun `successful update of course links`() {
+        transaction {
+            addLogger(StdOutSqlLogger)
+            CourseDAO.multiInsert(defValues)
+            val fromBD = CourseDAO.selectById(defValues.last().id) ?: throw SQLException("Entity not created")
+
+            val forUpdate = CourseEntity(
+                id = fromBD.id,
+                name = "Курс с новым именем",
+                inputLeafs = fromBD.outputLeafs,
+                outputLeafs = fromBD.inputLeafs
+            )
+
+            val updated = CourseDAO.update(forUpdate)
+            val res = CourseDAO.selectById(forUpdate.id)
+
+            assertTrue { res != null }
+            assertTrue { updated == 1 }
+            assertEquals(forUpdate, res)
+
+            rollback()
+        }
+    }
+
+    @Test
+    @DisplayName("Unsuccessful update of record - hierarchy violation: does not have a top level hierarchy")
+    fun `element not updated, because does not have a top level hierarchy`() {
+        transaction {
+            addLogger(StdOutSqlLogger)
+            CourseDAO.multiInsert(defValues)
+            val fromBD = CourseDAO.selectById(defValues.last().id) ?: throw SQLException("Entity not created")
+
+            val forUpdate = CourseEntity(
+                id = fromBD.id,
+                name = fromBD.name,
+                inputLeafs = linkedMapOf(
+                    dictionary[HierarchyElements.Indicator]!! to setOf(indicator11),
+                    dictionary[HierarchyElements.Knowledge]!! to setOf(knowledge111, knowledge112),
+                    dictionary[HierarchyElements.Ability]!! to setOf(ability111),
+                    dictionary[HierarchyElements.Skill]!! to setOf(skill111, skill112),
+                ),
+                outputLeafs = linkedMapOf(
+                    dictionary[HierarchyElements.Indicator]!! to setOf(indicator22),
+                    dictionary[HierarchyElements.Knowledge]!! to setOf(knowledge221),
+                    dictionary[HierarchyElements.Ability]!! to setOf(ability221, ability222),
+                    dictionary[HierarchyElements.Skill]!! to setOf(skill221, skill222)
+                )
+            )
+
+            assertThrows<SQLException> {
+                CourseDAO.update(forUpdate)
+            }
+
+            rollback()
+        }
+    }
+
+    @Test
+    @DisplayName("Unsuccessful update of record - hierarchy violation: skipping a hierarchy level")
+    fun `element was not updated because a hierarchy level was skipped`() {
+        transaction {
+            addLogger(StdOutSqlLogger)
+            CourseDAO.multiInsert(defValues)
+            val fromBD = CourseDAO.selectById(defValues.last().id) ?: throw SQLException("Entity not created")
+
+            val forUpdate = CourseEntity(
+                id = fromBD.id,
+                name = fromBD.name,
+                inputLeafs = linkedMapOf(
+                    dictionary[HierarchyElements.Competence]!! to setOf(competence1),
+                    dictionary[HierarchyElements.Knowledge]!! to setOf(knowledge111, knowledge112),
+                    dictionary[HierarchyElements.Ability]!! to setOf(ability111),
+                    dictionary[HierarchyElements.Skill]!! to setOf(skill111, skill112),
+                ),
+                outputLeafs = linkedMapOf(
+                    dictionary[HierarchyElements.Competence]!! to setOf(competence2),
+                    dictionary[HierarchyElements.Knowledge]!! to setOf(knowledge221),
+                    dictionary[HierarchyElements.Ability]!! to setOf(ability221, ability222),
+                    dictionary[HierarchyElements.Skill]!! to setOf(skill221, skill222)
+                )
+            )
+
+            assertThrows<SQLException> {
+                CourseDAO.update(forUpdate)
+            }
+
+            rollback()
+        }
+    }
+
+    @Test
+    @DisplayName("Unsuccessful update of record - hierarchy violation: association only with leafs")
+    fun `element was not updated because it only has an association with leafs`() {
+        transaction {
+            addLogger(StdOutSqlLogger)
+            CourseDAO.multiInsert(defValues)
+            val fromBD = CourseDAO.selectById(defValues.last().id) ?: throw SQLException("Entity not created")
+
+            val forUpdate = CourseEntity(
+                id = fromBD.id,
+                name = fromBD.name,
+                inputLeafs = linkedMapOf(
+                    dictionary[HierarchyElements.Knowledge]!! to setOf(knowledge111, knowledge112),
+                    dictionary[HierarchyElements.Ability]!! to setOf(ability111),
+                    dictionary[HierarchyElements.Skill]!! to setOf(skill111, skill112),
+                ),
+                outputLeafs = linkedMapOf(
+                    dictionary[HierarchyElements.Knowledge]!! to setOf(knowledge221),
+                    dictionary[HierarchyElements.Ability]!! to setOf(ability221, ability222),
+                    dictionary[HierarchyElements.Skill]!! to setOf(skill221, skill222)
+                )
+            )
+
+            assertThrows<SQLException> {
+                CourseDAO.update(forUpdate)
+            }
+
+            rollback()
+        }
+    }
+
+    @Test
+    @DisplayName("Successful deletion of the record")
+    fun `entity deleted successfully`() {
+        transaction {
+            addLogger(StdOutSqlLogger)
+            val entity = defValues.first()
+
+            val id = CourseDAO.insert(entity)
+            val fromBD = CourseDAO.selectById(entity.id)
+            val deleted = fromBD?.let { CourseDAO.deleteById(it.id) }
+            val res = fromBD?.let { CourseDAO.selectById(it.id) }
+
+            assertEquals(entity.id, id)
+            assertEquals(deleted, 1)
+            assertTrue { res == null }
+
+            rollback()
+        }
+    }
+
+    @Test
+    @DisplayName("Unsuccessfully deletion - record does not exist")
+    fun `Unsuccessfully record deletion - record does not exist`() {
+        transaction {
+            addLogger(StdOutSqlLogger)
+
+            CourseDAO.multiInsert(defValues)
+            val deleted = CourseDAO.deleteById(UUID.randomUUID())
+
+            assertEquals(deleted, 0)
+
+            rollback()
         }
     }
 }

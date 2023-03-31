@@ -148,6 +148,19 @@ create table course_input_leaf_link
             on delete cascade
 );
 
+-- Если входной элемент не верх иерархии (не является никому дочерним)
+-- и нет связи с его родителем - ошибка
+create or replace function course_input_leafs_insert_trigger() returns trigger
+    language plpgsql
+as
+$$
+begin 
+	
+	
+	return new;
+end;
+$$;
+
 create table course_output_leaf_link
 (
     course_id uuid not null
@@ -167,7 +180,7 @@ begin
 		then return true;
 	else return false;
 	end if;
-end
+end;
 $$;
 
 -- Получение элементов ККХ, входящих в данный курс
@@ -200,7 +213,7 @@ begin
 		left join cqc_elem_dict dict 
 		on el.type_id = dict.id
 		where el.id = any(res_id);
-end
+end;
 $$;
 
 -- Получение исходящих из данного курса элементов ККХ
@@ -233,7 +246,5 @@ begin
 		left join cqc_elem_dict dict 
 		on el.type_id = dict.id
 		where el.id = any(res_id);
-end
+end;
 $$;		
-
-select * from get_input_elements('87db90d6-6d82-4a68-87c6-97bcf953d39a')

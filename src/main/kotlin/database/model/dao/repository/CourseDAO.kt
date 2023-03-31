@@ -1,18 +1,14 @@
 package database.model.dao.repository
 
 import database.model.dao.entity.*
-import database.model.dao.repository.CQCElementDAO.toCQCElementEntity
-import database.model.dao.table.CQCElementDictionaryTable
-import database.model.dao.table.CQCElementTable
 import database.model.dao.table.CourseTable
-import database.model.dao.table.link.CourseInputLeafTable
-import database.model.dao.table.link.CourseOutputLeafTable
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import java.sql.ResultSet
 import java.sql.SQLDataException
 import java.util.*
+import kotlin.collections.LinkedHashMap
 
 /**
  * Реализация DAO для взаимодействия с таблицей курсов: course
@@ -38,8 +34,10 @@ object CourseDAO : ICourseDAO {
         return result
     }
 
-    private fun getInputElements(courseId: UUID): Map<CQCElementDictionaryEntity, Set<CQCElementEntity>> {
-        return "select * from get_input_elements('${courseId}')".execAndMap { rs ->
+    private fun getInputElements(courseId: UUID): LinkedHashMap<CQCElementDictionaryEntity, Set<CQCElementEntity>> {
+        val res = LinkedHashMap<CQCElementDictionaryEntity, Set<CQCElementEntity>>()
+
+        val resultRow =  "select * from get_input_elements('${courseId}')".execAndMap { rs ->
             val parentId: String? = rs.getString("elem_parent_id")
 
             CQCElementEntity(
@@ -53,10 +51,15 @@ object CourseDAO : ICourseDAO {
                 value = rs.getString("elem_value")
             )
         }.groupBy { it.type }.mapValues { it.value.toSet() }
+
+        resultRow.forEach { (k, v) -> res[k] = v }
+        return res
     }
 
-    private fun getOutputElements(courseId: UUID): Map<CQCElementDictionaryEntity, Set<CQCElementEntity>> {
-        return "select * from get_output_elements('${courseId}')".execAndMap { rs ->
+    private fun getOutputElements(courseId: UUID): LinkedHashMap<CQCElementDictionaryEntity, Set<CQCElementEntity>> {
+        val res = LinkedHashMap<CQCElementDictionaryEntity, Set<CQCElementEntity>>()
+
+        val resultRow = "select * from get_output_elements('${courseId}')".execAndMap { rs ->
             val parentId: String? = rs.getString("elem_parent_id")
 
             CQCElementEntity(
@@ -70,8 +73,36 @@ object CourseDAO : ICourseDAO {
                 value = rs.getString("elem_value")
             )
         }.groupBy { it.type }.mapValues { it.value.toSet() }
+
+        resultRow.forEach { (k, v) -> res[k] = v }
+        return res
     }
 
+    private fun insertInputLeaf(element: CourseEntity) {
+        element.inputLeafs.values.map { leafSet ->
+            CourseInputLeafDAO.multiInsert(
+                leafSet.map {
+                    CourseInputLeafEntity(
+                        courseId = element.id,
+                        leafId = it.id
+                    )
+                }
+            )
+        }
+    }
+
+    private fun insertOutputLeaf(element: CourseEntity) {
+        element.outputLeafs.values.map { leafSet ->
+            CourseOutputLeafDAO.multiInsert(
+                leafSet.map {
+                    CourseOutputLeafEntity(
+                        courseId = element.id,
+                        leafId = it.id
+                    )
+                }
+            )
+        }
+    }
 
     /**
      * Перевод результатов SQL запроса в отображение CQCElementHierarchyEntity
@@ -134,27 +165,8 @@ object CourseDAO : ICourseDAO {
             it[name] = element.name
         }.insertedCount
 
-        element.inputLeafs.values.map { v ->
-            CourseInputLeafDAO.multiInsert(
-                v.map {
-                    CourseInputLeafEntity(
-                        courseId = element.id,
-                        leafId = it.id
-                    )
-                }
-            )
-        }
-
-        element.outputLeafs.values.map { v ->
-            CourseOutputLeafDAO.multiInsert(
-                v.map {
-                    CourseOutputLeafEntity(
-                        courseId = element.id,
-                        leafId = it.id
-                    )
-                }
-            )
-        }
+        insertInputLeaf(element)
+        insertOutputLeaf(element)
 
         return if (insertedCount > 0) element.id else null
     }
@@ -170,27 +182,10 @@ object CourseDAO : ICourseDAO {
             this[CourseTable.name] = it.name
         }
 
-//        val inputs = elements.associate { it.id to it.inputLeafs.values }
-//            .flatMap { pair ->
-//                pair.value.map {
-//                    CourseInputLeafEntity(
-//                        courseId = pair.key,
-//                        leafId = it.id
-//                    )
-//                }
-//            }
-//        val outputs = elements.associate { it.id to it.outputLeafs.values }
-//            .flatMap { pair ->
-//                pair.value.map {
-//                    CourseOutputLeafEntity(
-//                        courseId = pair.key,
-//                        leafId = it.id
-//                    )
-//                }
-//            }
-//
-//        CourseInputLeafDAO.multiInsert(inputs)
-//        CourseOutputLeafDAO.multiInsert(outputs)
+        elements.forEach { course ->
+            insertInputLeaf(course)
+            insertOutputLeaf(course)
+        }
 
         return res
     }
@@ -220,27 +215,8 @@ object CourseDAO : ICourseDAO {
             it[name] = element.name
         }
 
-        element.inputLeafs.values.map { v ->
-            CourseInputLeafDAO.multiInsert(
-                v.map {
-                    CourseInputLeafEntity(
-                        courseId = element.id,
-                        leafId = it.id
-                    )
-                }
-            )
-        }
-
-        element.outputLeafs.values.map { v ->
-            CourseOutputLeafDAO.multiInsert(
-                v.map {
-                    CourseOutputLeafEntity(
-                        courseId = element.id,
-                        leafId = it.id
-                    )
-                }
-            )
-        }
+        insertInputLeaf(element)
+        insertOutputLeaf(element)
 
         return res
     }

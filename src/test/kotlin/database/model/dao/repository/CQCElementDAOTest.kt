@@ -38,16 +38,16 @@ class CQCElementDAOTest : IDAOTest {
 
         private val hierarchy = setOf(
             CQCElementHierarchyEntity(
-                dictionary[HierarchyElements.Competence]!!.id, dictionary[HierarchyElements.Indicator]!!.id
+                dictionary[HierarchyElements.Competence]!!, dictionary[HierarchyElements.Indicator]!!
             ),
             CQCElementHierarchyEntity(
-                dictionary[HierarchyElements.Indicator]!!.id, dictionary[HierarchyElements.Knowledge]!!.id
+                dictionary[HierarchyElements.Indicator]!!, dictionary[HierarchyElements.Knowledge]!!
             ),
             CQCElementHierarchyEntity(
-                dictionary[HierarchyElements.Indicator]!!.id, dictionary[HierarchyElements.Ability]!!.id
+                dictionary[HierarchyElements.Indicator]!!, dictionary[HierarchyElements.Ability]!!
             ),
             CQCElementHierarchyEntity(
-                dictionary[HierarchyElements.Indicator]!!.id, dictionary[HierarchyElements.Skill]!!.id
+                dictionary[HierarchyElements.Indicator]!!, dictionary[HierarchyElements.Skill]!!
             ),
         )
 
@@ -106,7 +106,7 @@ class CQCElementDAOTest : IDAOTest {
             transaction {
                 addLogger(StdOutSqlLogger)
                 dictionary.values.forEach { CQCElementDictionaryDAO.deleteById(it.id) }
-                hierarchy.forEach { CQCElementHierarchyDAO.deleteByPK(it.parentId, it.childId) }
+                hierarchy.forEach { CQCElementHierarchyDAO.deleteByPK(it.parent.id, it.child.id) }
             }
         }
     }

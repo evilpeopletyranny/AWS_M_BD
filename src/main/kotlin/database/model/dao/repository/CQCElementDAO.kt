@@ -23,7 +23,7 @@ object CQCElementDAO : ICQCElementDAO {
     /**
      * Перевод результатов SQL запроса в отображение CQCElementHierarchyEntity
      */
-     fun ResultRow.toCQCElementEntity(): CQCElementEntity = CQCElementEntity(
+    private fun ResultRow.toCQCElementEntity(): CQCElementEntity = CQCElementEntity(
         id = this[CQCElementTable.id].value,
         parentId = this[CQCElementTable.parentId]?.value,
         type = CQCElementDictionaryEntity(

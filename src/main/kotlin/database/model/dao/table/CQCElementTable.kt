@@ -7,6 +7,6 @@ import org.jetbrains.exposed.dao.id.UUIDTable
  */
 object CQCElementTable : UUIDTable("cqc_elem") {
     val parentId = reference("parent_id", CQCElementTable).nullable()
-    val type = reference("type_id", CQCElementDictionaryTable).nullable()
+    val type = reference("type_id", CQCElementDictionaryTable)
     val value = varchar("value", 250)
 }
