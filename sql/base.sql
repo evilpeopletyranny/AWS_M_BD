@@ -157,9 +157,22 @@ $$
 begin 
 	
 	
+	if (((select parent_type_id from cqc_elem_hierarchy where child_type_id = (select type_id from cqc_elem where id = new.leaf_id)) is not null)
+	and ((select leaf_id from course_input_leaf_link where leaf_id = (select parent_id from cqc_elem where id = new.leaf_id) and course_id = new.course_id) is null)) then
+		raise exception 'Hierarchy violation. The course has no relation to the elements: %', (select value from cqc_elem where id = new.leaf_id);
+	end if;
+	
 	return new;
 end;
 $$;
+
+create trigger course_input_leafs_insert_trigger
+    before insert or update
+    on course_input_leaf_link
+    for each row
+execute procedure course_input_leafs_insert_trigger();
+
+drop trigger course_input_leafs_insert_trigger on course_input_leaf_link;
 
 create table course_output_leaf_link
 (
@@ -248,3 +261,10 @@ begin
 		where el.id = any(res_id);
 end;
 $$;		
+
+
+select dict1.id, dict1."name", dict1.is_deleted, dict2.id, dict2."name", dict2.is_deleted  from cqc_elem_hierarchy 
+left join cqc_elem_dict as dict1
+on parent_type_id = dict1.id 
+left join cqc_elem_dict as dict2
+on child_type_id = dict2.id;
